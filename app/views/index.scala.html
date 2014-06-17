@@ -1,0 +1,81 @@
+@(message: String)(implicit request: RequestHeader)
+
+@import helper._
+
+@main("Websocket test") {
+
+	<h1>WebSockets Client</h1>
+ 
+    <div id="chatLog"></div>
+ 
+    <p id="examples">e.g. try 'hi', 'name', 'age', 'today'</p>
+ 
+    <input id="text" type="text" />
+    <button id="disconnect">Disconnect</button>
+ 
+ 	<script>
+ 	
+ 	$(document).ready(function() {
+ 	 
+    	var socket = new WebSocket("@routes.Application.ws.webSocketURL()");
+
+    	connect();
+ 	 
+	 	function connect(){
+	 	    try{
+	 	 
+	 	 
+	 	        message('<p class="event">Socket status: '+socket.readyState);
+	 	 
+	 	        socket.onopen = function(){
+	 	             message('<p class="event">Socket status: '+socket.readyState+' (open)');
+	 	        }
+	 	 
+	 	        socket.onmessage = function(msg){
+	 	             message('<p class="message">Received: '+msg.data);
+	 	        }
+	 	 
+	 	        socket.onclose = function(){
+	 	             message('<p class="event">Socket status: '+socket.readyState+' (Closed)');
+	 	        }          
+	 	 
+	 	    } catch(exception){
+	 	         message('<p>Error'+exception);
+	 	    }
+	 	}
+	 	
+	 	function message(msg){
+	 	    $('#chatLog').append(msg+'</p>');
+	 	}
+	 	
+	 	$('#text').keypress(function(event) {
+	 	    if (event.keyCode == '13') {
+	 	        send();
+	 	    }
+	 	});
+	 	
+	 	function send(){
+	 		 
+	 	    var text = $('#text').val();
+	 	    if(text==""){
+	 	        message('<p class="warning">Please enter a message');
+	 	        return ;
+	 	    }
+	 	    try{
+	 	        socket.send(text);
+	 	        message('<p class="event">Sent: '+text)
+	 	    } catch(exception){
+	 	    message('<p class="warning"> Error:' + exception);
+	 	    }
+	 	 
+	 	    $('#text').val("");
+	 	 
+	 	}
+	 	
+	 	$('#disconnect').click(function(){
+	 	    socket.close();
+	 	});
+    });
+ 	
+ 	</script>   
+}
