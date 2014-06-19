@@ -10,7 +10,6 @@ import org.scalatest.BeforeAndAfterAll
 import akka.testkit.ImplicitSender
 
 
-
 class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
             with WordSpecLike with Matchers with BeforeAndAfterAll {
  
