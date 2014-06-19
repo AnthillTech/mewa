@@ -10,8 +10,9 @@
  
     <p id="examples">e.g. try 'hi', 'name', 'age', 'today'</p>
  
-    <input id="text" type="text" />
-    <button id="disconnect">Disconnect</button>
+    <button id="connectChannel">Connect to channel</button>
+    <button id="disconnectChannel">Disconnect from channel</button>
+    <div>Message: <input id="text" type="text"/></div>
  
  	<script>
  	
@@ -50,30 +51,41 @@
 	 	
 	 	$('#text').keypress(function(event) {
 	 	    if (event.keyCode == '13') {
-	 	        send();
+	 	    	sendEvent();
 	 	    }
 	 	});
 	 	
-	 	function send(){
+	 	function sendEvent(){
 	 		 
 	 	    var text = $('#text').val();
 	 	    if(text==""){
 	 	        message('<p class="warning">Please enter a message');
 	 	        return ;
 	 	    }
-	 	    try{
-	 	        socket.send(text);
-	 	        message('<p class="event">Sent: '+text)
-	 	    } catch(exception){
-	 	    message('<p class="warning"> Error:' + exception);
-	 	    }
-	 	 
+ 	    	msg = {id: "event", event: text}
+ 	    	sendMsg(msg)
 	 	    $('#text').val("");
 	 	 
 	 	}
 	 	
-	 	$('#disconnect').click(function(){
-	 	    socket.close();
+	 	function sendMsg(msg){
+	 	    try{
+	 	    	json = JSON.stringify(msg);
+	 	        socket.send(json);
+	 	        message('<p class="event">Sent: ' + json)
+	 	    } catch(exception){
+		 	    message('<p class="warning"> Error:' + exception);
+	 	    }
+	 	}
+	 	
+	 	$('#connectChannel').click(function(){
+ 	    	msg = {id: "connect", channel: "test", password: ""}
+ 	    	sendMsg(msg)
+	 	});
+	 	
+	 	$('#disconnectChannel').click(function(){
+ 	    	msg = {id: "disconnect"}
+ 	    	sendMsg(msg)
 	 	});
     });
  	
