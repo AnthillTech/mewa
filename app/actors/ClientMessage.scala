@@ -29,14 +29,16 @@ case class DisconnectFromChannel() extends ClientMessage
 case class SendToChannel(event: String) extends ClientMessage
 
 /** Client was successfuk connected to the channel. */
-case object ConnectedEvent extends ClientMessage
+case class ConnectedEvent() extends ClientMessage
 /** client was disconnected from channel. */
-case object DisconnectedEvent extends ClientMessage
+case class DisconnectedEvent() extends ClientMessage
 
 /** Client can be connected only to one channel at the time. */
-case object AlreadyConnectedError extends ClientMessage
+case class AlreadyConnectedError() extends ClientMessage
 /** There is no connection to the channel. */
-case object NotConnectedError extends ClientMessage
+case class NotConnectedError() extends ClientMessage
+/** Wrong credentials. */
+case class AuthorizationError() extends ClientMessage
 
 
 
@@ -59,13 +61,17 @@ object ClientMessage {
    */
   implicit def jsonFormat: Format[ClientMessage] = Format(
     (JsPath \ "message").read[String].flatMap {
-      case "disconnect" => Reads(_  => JsSuccess(new DisconnectFromChannel()))
       case "connect" => connectReads
+      case "disconnect" => Reads(_  => JsSuccess(new DisconnectFromChannel()))
+      case "already-connected-error" => Reads(_  => JsSuccess(new AlreadyConnectedError()))
+      case "not-connected-error" => Reads(_  => JsSuccess(new NotConnectedError()))
+      case "authorization-error" => Reads(_  => JsSuccess(new AuthorizationError()))
       case other => Reads(_ => JsError("Unknown client message: <" + other + ">"))
     },
     Writes {
       case msg: ConnectToChannel => connectWrites.writes(msg)
       case msg: DisconnectFromChannel => disconnectWrites.writes(msg)
+      case msg: NotConnectedError => notConnectedWrites.writes(msg)
     }
   )
 
@@ -81,11 +87,17 @@ object ClientMessage {
       (JsPath \ "channel").read[String] and
       (JsPath \ "password").read[String] 
     )(ConnectToChannel.apply _)
-  
 
+    
   /** Serialize Disconnect message */
   implicit val disconnectWrites = new Writes[DisconnectFromChannel] {
     def writes(msg: DisconnectFromChannel) = Json.obj("message" -> "disconnect")
+  }
+
+    
+  /** Serialize Disconnect message */
+  implicit val notConnectedWrites = new Writes[NotConnectedError] {
+    def writes(msg: NotConnectedError) = Json.obj("message" -> "not-connected-error")
   }
 }  
 

@@ -27,10 +27,11 @@ class WebSocketActor(socket: ActorRef) extends Actor {
   def disconnected: Actor.Receive = {
     
     case SendToChannel(msg) =>
-      socket ! NotConnectedError
+      socket ! NotConnectedError()
     
-    case DisconnectFromChannel =>
-      socket ! NotConnectedError
+    case DisconnectFromChannel() =>
+      log.info("Trying to disconnect")
+      socket ! NotConnectedError()
     
     case ConnectToChannel(channel, pasword) =>
       log.info("Trying to connect to channel: " + channel)

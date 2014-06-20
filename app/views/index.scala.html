@@ -79,12 +79,12 @@
 	 	}
 	 	
 	 	$('#connectChannel').click(function(){
- 	    	msg = {id: "connect", channel: "test", password: ""}
+ 	    	msg = {message: "connect", channel: "test", password: "pass"}
  	    	sendMsg(msg)
 	 	});
 	 	
 	 	$('#disconnectChannel').click(function(){
- 	    	msg = {id: "disconnect"}
+ 	    	msg = {message: "disconnect"}
  	    	sendMsg(msg)
 	 	});
     });

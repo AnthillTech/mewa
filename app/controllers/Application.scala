@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.Play.current
 import actors.WebSocketActor
 import play.api.libs.json.JsValue
+import actors.ClientMessage
 
 
 object Application extends Controller {
@@ -15,7 +16,7 @@ object Application extends Controller {
       )
   }
 
-  def ws = WebSocket.acceptWithActor[JsValue, String] { request => out =>
+  def ws = WebSocket.acceptWithActor[ClientMessage, ClientMessage] { request => out =>
     WebSocketActor.props(out)
   }
   
