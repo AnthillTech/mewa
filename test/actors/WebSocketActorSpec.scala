@@ -25,16 +25,16 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
     "not be connected to the channel" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! SendMessage("") 
+      wsActor ! SendToChannel("") 
       expectMsg(NotConnectedError)
     }
   }
   
   "Not connected socket" should {
  
-    "throw error if get disconnect message." in {
+    "throw error if got disconnect message." in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! Disconnect
+      wsActor ! DisconnectFromChannel
       expectMsg(NotConnectedError)
     }
   }
