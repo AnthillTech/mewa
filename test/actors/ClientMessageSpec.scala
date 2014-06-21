@@ -59,15 +59,177 @@ class DisconnectMessageSpec extends Specification {
     val expected = """{"message":"disconnect"}"""
     
     "serialize to json" in {
-      val msg : ClientMessage= DisconnectFromChannel()
+      val msg : ClientMessage = DisconnectFromChannel
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = DisconnectFromChannel()
+      val msg = DisconnectFromChannel
       assertFromJson(msg)
     }
   }
   
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class SendToChannelSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "SendToChannel message" should {
+    
+    val expected = """{ "message":"send-to-channel",
+												"event":"test" }
+									 """
+    
+    "serialize to json" in {
+      val msg :ClientMessage = SendToChannel("test")
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected.replaceAll("\\s+", ""))
+    }
+
+    "deserialize from json" in {
+      val msg = SendToChannel("test")
+      assertFromJson(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class ConnectedEventSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "ConnectedEvent message" should {
+    
+    val expected = """{"message":"connected"}"""
+    
+    "serialize to json" in {
+      val msg : ClientMessage = ConnectedEvent
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = ConnectedEvent
+      assertFromJson(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class DisconnectedEventSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "DisconnectedEvent message" should {
+    
+    val expected = """{"message":"disconnected"}"""
+    
+    "serialize to json" in {
+      val msg : ClientMessage = DisconnectedEvent
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = DisconnectedEvent
+      assertFromJson(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class ChannelEventSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "NotConnectedError message" should {
+    
+    val expected = """{"message":"channel-event","event":"content"}"""
+    
+    "serialize to json" in {
+      val msg : ClientMessage = ChannelEvent("content")
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = ChannelEvent("content")
+      assertFromJson(msg)
+    }
+  }
+}
+
+@RunWith(classOf[JUnitRunner])
+class AlreadyConnectedErrorSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "AlreadyConnectedError message" should {
+    
+    val expected = """{"message":"already-connected-error"}"""
+    
+    "serialize to json" in {
+      val msg : ClientMessage = AlreadyConnectedError
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = AlreadyConnectedError
+      assertFromJson(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class AuthorizationErrorSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "AuthorizationError message" should {
+    
+    val expected = """{"message":"authorization-error"}"""
+    
+    "serialize to json" in {
+      val msg : ClientMessage = AuthorizationError
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = AuthorizationError
+      assertFromJson(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class NotConnectedErrorSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "NotConnectedError message" should {
+    
+    val expected = """{"message":"not-connected-error"}"""
+    
+    "serialize to json" in {
+      val msg : ClientMessage = NotConnectedError
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = NotConnectedError
+      assertFromJson(msg)
+    }
+  }
 }
