@@ -33,19 +33,19 @@ case object DisconnectFromChannel extends ClientMessage
 case class SendToChannel(event: String) extends ClientMessage
 
 /** 
- *  Client was successfully connected to the channel. 
+ *  Notify client that it was successfully connected to the channel. 
  *  JSON format: 
  *  {"message": "connected"}  
  */
 case object ConnectedEvent extends ClientMessage
 /** 
- *  Client was disconnected from channel. 
+ *  Notify client that it was disconnected from channel. 
  *  JSON format: 
  *  {"message": "disconnected"}  
  */
 case object DisconnectedEvent extends ClientMessage
 /** 
- *  Client was successfully connected to the channel. 
+ *  Notify client that it was successfully connected to the channel. 
  *  JSON format: 
  *  {"message": "channel-event", "event":"event content"}  
  */

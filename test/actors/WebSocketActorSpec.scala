@@ -10,6 +10,11 @@ import org.scalatest.BeforeAndAfterAll
 import akka.testkit.ImplicitSender
 
 
+/**
+ * Correct connection params for test  spec are:
+ * channel:  test
+ * password: pass
+ */
 class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
             with WordSpecLike with Matchers with BeforeAndAfterAll {
  
@@ -32,20 +37,22 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   
   "Not connected socket" should {
  
-    "throw error if got disconnect message." in {
+    "send NotConnectedError if got disconnect message." in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
       wsActor ! DisconnectFromChannel
       expectMsg(NotConnectedError)
     }
-  }
-/*  
-  "Correct channel name and password" should {
  
-    "allow connection." in {
+    "refuse connection with wrong channel name" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! Connect("test", "test")
-      expectMsg(ConnectedEvent)
+      wsActor ! ConnectToChannel("", "pass")
+      expectMsg(AuthorizationError)
+    }
+ 
+    "refuse connection with wrong password" in {
+      val wsActor = system.actorOf(WebSocketActor.props(self))
+      wsActor ! ConnectToChannel("test", "")
+      expectMsg(AuthorizationError)
     }
   }
-*/ 
 }

@@ -30,11 +30,11 @@ class WebSocketActor(socket: ActorRef) extends Actor {
       socket ! NotConnectedError
     
     case DisconnectFromChannel =>
-      log.info("Trying to disconnect")
       socket ! NotConnectedError
     
     case ConnectToChannel(channel, pasword) =>
       log.info("Trying to connect to channel: " + channel)
+      socket ! AuthorizationError
   }
 
   /** Process messages while connected to the channel */
