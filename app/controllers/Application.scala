@@ -5,7 +5,7 @@ import play.api.mvc._
 import play.api.Play.current
 import actors.WebSocketActor
 import play.api.libs.json.JsValue
-import actors.ClientMessage
+import actors.WebSocketActor.ClientMessage
 
 
 object Application extends Controller {

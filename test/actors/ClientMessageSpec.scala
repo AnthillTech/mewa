@@ -7,6 +7,7 @@ import play.api.libs.json.{Json, JsSuccess}
 import play.api.test._
 import play.api.test.Helpers._
 import play.api.libs.json.JsSuccess
+import actors.WebSocketActor._
 
 object ClientMessageSpec extends Specification{
   
