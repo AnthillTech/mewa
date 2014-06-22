@@ -9,6 +9,7 @@ import play.api.libs.json.JsResult
 import play.api.libs.json.JsSuccess
 import play.api.libs.json.JsSuccess
 import play.api.libs.json.JsValue
+import akka.actor.ActorLogging
 
 
 
@@ -21,9 +22,9 @@ object WebSocketActor {
   /** 
    *  Connect client to the channel  
    *  JSON format:
-   *  {"message": "connect", "channel":"channel name", "password":"channel password"}
+   *  {"message": "connect", "channel":"channel name", "device":"device1", "password":"channel password"}
    */
-  case class ConnectToChannel(channel: String, password: String) extends ClientMessage
+  case class ConnectToChannel(channel: String, device: String, password: String) extends ClientMessage
   /** 
    *  Disconnect from channel.
    *  JSON format: 
@@ -50,7 +51,7 @@ object WebSocketActor {
    */
   case object DisconnectedEvent extends ClientMessage
   /** 
-   *  Notify client that it was successfully connected to the channel. 
+   *  Notify client about new event send by other clients to the connected channel 
    *  JSON format: 
    *  {"message": "channel-event", "event":"event content"}  
    */
@@ -93,6 +94,7 @@ object WebSocketActor {
       
       case msg: ConnectToChannel => Json.obj( "message" -> "connect" 
                                             , "channel" -> msg.channel 
+                                            , "device" -> msg.device
                                             , "password" -> msg.password )
       case DisconnectFromChannel => Json.obj("message" -> "disconnect")
       case msg: SendToChannel => Json.obj( "message" -> "send-to-channel" 
@@ -128,8 +130,9 @@ object WebSocketActor {
 
   def connectFromJson(jsval:JsValue): JsResult[ConnectToChannel] = { 
     val channel = (jsval \ "channel").as[String]
+    val device : String= (jsval \ "device").as[String]
     val password : String= (jsval \ "password").as[String]
-    JsSuccess(ConnectToChannel(channel, password))
+    JsSuccess(ConnectToChannel(channel, device, password))
   }
 
   def sendToChannelFromJson(jsval:JsValue): JsResult[SendToChannel] = { 
@@ -147,13 +150,10 @@ object WebSocketActor {
 /**
  * WebSocket actor implementation
  */
-class WebSocketActor(socket: ActorRef) extends Actor {
+class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
  
   import WebSocketActor._
   
-  val log = Logging(context.system, this)
-  
-  /** Not connected state */
   def disconnected: Actor.Receive = {
     
     case SendToChannel(msg) =>
@@ -162,7 +162,7 @@ class WebSocketActor(socket: ActorRef) extends Actor {
     case DisconnectFromChannel =>
       socket ! NotConnectedError
     
-    case ConnectToChannel(channel, pasword) =>
+    case ConnectToChannel(channel, device, pasword) =>
       log.info("Trying to connect to channel: " + channel)
       socket ! AuthorizationError
   }
@@ -176,8 +176,8 @@ class WebSocketActor(socket: ActorRef) extends Actor {
     case DisconnectFromChannel =>
       log.info("disconnect")
     
-    case ConnectToChannel(channel, pasword) =>
-      log.info("Trying to connect while alreadyy connected .")
+    case ConnectToChannel(channel, device, pasword) =>
+      log.info("Trying to connect while already connected .")
   }
   
   def receive = disconnected

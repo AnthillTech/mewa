@@ -45,13 +45,13 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
     "refuse connection with wrong channel name" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! ConnectToChannel("", "pass")
+      wsActor ! ConnectToChannel("", "", "pass")
       expectMsg(AuthorizationError)
     }
  
     "refuse connection with wrong password" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! ConnectToChannel("test", "")
+      wsActor ! ConnectToChannel("test", "", "")
       expectMsg(AuthorizationError)
     }
   }

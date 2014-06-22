@@ -33,17 +33,18 @@ class ConnectMessageSpec extends Specification {
     
     val expected = """{ "message":"connect",
 												"channel":"name",
+												"device":"device1",
 												"password":"pass" }
 									 """
     
     "serialize to json" in {
-      val msg :ClientMessage = ConnectToChannel("name", "pass")
+      val msg :ClientMessage = ConnectToChannel("name", "device1", "pass")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected.replaceAll("\\s+", ""))
     }
 
     "deserialize from json" in {
-      val msg = ConnectToChannel("name", "pass")
+      val msg = ConnectToChannel("name", "device1", "pass")
       assertFromJson(msg)
     }
   }
