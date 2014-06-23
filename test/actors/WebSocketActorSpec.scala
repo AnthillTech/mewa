@@ -20,6 +20,10 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
   def this() = this(ActorSystem("WebSocketActorSpec"))
  
+  override def beforeAll {
+    val channelManager = system.actorOf(Props[ChannelManagerActor], "channel-manager")
+  }
+ 
   override def afterAll {
     TestKit.shutdownActorSystem(system)
   }
@@ -37,12 +41,6 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   
   "Not connected socket" should {
  
-    "send NotConnectedError if got disconnect message." in {
-      val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! DisconnectFromChannel
-      expectMsg(NotConnectedError)
-    }
- 
     "refuse connection with wrong channel name" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
       wsActor ! ConnectToChannel("", "", "pass")
@@ -53,6 +51,12 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       val wsActor = system.actorOf(WebSocketActor.props(self))
       wsActor ! ConnectToChannel("test", "", "")
       expectMsg(AuthorizationError)
+    }
+ 
+    "connect to the channel" in {
+      val wsActor = system.actorOf(WebSocketActor.props(self))
+      wsActor ! ConnectToChannel("test1", "dev1", "pass1")
+      expectMsg(ConnectedEvent)
     }
   }
 }

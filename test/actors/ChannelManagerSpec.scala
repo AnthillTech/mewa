@@ -28,19 +28,21 @@ class ChannelManagerSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   override def afterAll {
     TestKit.shutdownActorSystem(system)
   }
+  
+  import ChannelManagerActor._
  
   "ChannelManager" should {
  
-    "be creatable" in {
+    "refuse connection with invalid channel name" in {
       val manager = system.actorSelection("/user/channel-manager")
-      manager ! "ok" 
-      expectMsg("ok1")
+      manager ! GetChannel("", "", "")
+      expectMsg(AuthorizationError)
     }
  
-    "accessible by path" in {
+    "return new channel" in {
       val manager = system.actorSelection("/user/channel-manager")
-      manager ! "ok" 
-      expectMsg("ok2")
+      manager ! GetChannel("test1", "dev1", "pass1") 
+      expectMsgType[ChannelFound]
     }
   }
 }

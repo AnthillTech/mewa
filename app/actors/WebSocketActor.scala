@@ -153,31 +153,40 @@ object WebSocketActor {
 class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
  
   import WebSocketActor._
-  
+
+  /** Disconnected from channel */
   def disconnected: Actor.Receive = {
     
     case SendToChannel(msg) =>
       socket ! NotConnectedError
     
-    case DisconnectFromChannel =>
-      socket ! NotConnectedError
+    case ConnectToChannel(channel, device, password) =>
+      val manager = context.actorSelection("/user/channel-manager")
+      manager ! ChannelManagerActor.GetChannel(channel, device, password)
+      context.become(connecting)
+  }
+
+  /** Trying to connect */
+  def connecting: Actor.Receive = {
     
-    case ConnectToChannel(channel, device, pasword) =>
-      log.info("Trying to connect to channel: " + channel)
+    case ChannelManagerActor.ChannelFound(channel) =>
+      channel ! ChannelActor.AddListener
+      socket ! ConnectedEvent
+      context.become(connected(channel))
+    
+    case ChannelManagerActor.AuthorizationError =>
       socket ! AuthorizationError
+      context.become(disconnected)
   }
 
   /** Process messages while connected to the channel */
-  def connected: Actor.Receive = {
+  def connected(channel: ActorRef): Actor.Receive = {
     
     case SendToChannel(msg) =>
-      log.info("Message received: " + msg)
+      channel ! msg
     
     case DisconnectFromChannel =>
-      log.info("disconnect")
-    
-    case ConnectToChannel(channel, device, pasword) =>
-      log.info("Trying to connect while already connected .")
+      channel ! ChannelActor.RemoveListener
   }
   
   def receive = disconnected
