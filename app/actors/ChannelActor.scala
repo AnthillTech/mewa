@@ -8,19 +8,38 @@ import play.api.libs.json.JsSuccess
 import play.api.libs.json.JsResult
 import play.api.libs.json.JsSuccess
 import play.api.libs.json.JsSuccess
+import akka.actor.ActorLogging
+import scala.collection.Set
 
 
 
 object ChannelActor {
+
+  sealed trait ChannelMessage
+  case object AddListener extends ChannelMessage
+  case object RemoveListener extends ChannelMessage
+  case class Event(content:String) extends ChannelMessage
 }
 
 
 /**
- * Channel
+ * Channel actor
  */
-class ChannelActor() extends Actor {
+class ChannelActor() extends Actor with ActorLogging {
 
-  def receive: Actor.Receive = {
-    case "ok" => Console.println("channel")
+  import ChannelActor._
+  
+  def broadcaster(listeners: Set[ActorRef]): Actor.Receive = {
+    
+    case AddListener =>
+      context.become(broadcaster(listeners + sender()))
+    
+    case RemoveListener => 
+      context.become(broadcaster(listeners - sender()))
+    
+    case Event(content) => 
+      listeners.filter(_ != sender()).map(_ forward Event(content))
   }
+  
+  def receive = broadcaster(Set.empty)
 }

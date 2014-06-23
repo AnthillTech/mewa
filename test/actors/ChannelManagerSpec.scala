@@ -23,7 +23,6 @@ class ChannelManagerSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
   override def beforeAll {
     val channelManager = system.actorOf(Props[ChannelManagerActor], "channel-manager")
-    Console.println("channelManager: " + channelManager)
   }
  
   override def afterAll {
@@ -34,7 +33,6 @@ class ChannelManagerSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
     "be creatable" in {
       val manager = system.actorSelection("/user/channel-manager")
-      Console.println("actorSelection: " + manager)
       manager ! "ok" 
       expectMsg("ok1")
     }
