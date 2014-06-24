@@ -8,8 +8,6 @@
  
     <div id="chatLog"></div>
  
-    <p id="examples">e.g. try 'hi', 'name', 'age', 'today'</p>
- 
     <button id="connectChannel">Connect to channel</button>
     <button id="disconnectChannel">Disconnect from channel</button>
     <div>Message: <input id="text" type="text"/></div>
@@ -79,7 +77,7 @@
 	 	}
 	 	
 	 	$('#connectChannel').click(function(){
- 	    	msg = {message: "connect", channel: "test", password: "pass"}
+ 	    	msg = {message: "connect", channel:"channel1", device:"device1", password:"pass1"}
  	    	sendMsg(msg)
 	 	});
 	 	

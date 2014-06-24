@@ -83,17 +83,17 @@ class SendToChannelSpec extends Specification {
   "SendToChannel message" should {
     
     val expected = """{ "message":"send-to-channel",
-												"event":"test" }
+												"event": { "id":"eventId", "content": "eventContent"} }
 									 """
     
     "serialize to json" in {
-      val msg :ClientMessage = SendToChannel("test")
+      val msg :ClientMessage = SendToChannel("eventId", "eventContent")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected.replaceAll("\\s+", ""))
     }
 
     "deserialize from json" in {
-      val msg = SendToChannel("test")
+      val msg = SendToChannel("eventId", "eventContent")
       assertFromJson(msg)
     }
   }

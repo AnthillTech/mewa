@@ -34,9 +34,9 @@ object WebSocketActor {
   /** 
    *  Send event to the channel 
    *  JSON format: 
-   *  {"message": "send-to-channel", "event":"event content"}  
+   *  {"message": "send-to-channel", "event":{"id": "eventId", "content":"event content"}}  
    */
-  case class SendToChannel(event: String) extends ClientMessage
+  case class SendToChannel(eventId: String, eventContent: String) extends ClientMessage
   
   /** 
    *  Notify client that it was successfully connected to the channel. 
@@ -98,7 +98,7 @@ object WebSocketActor {
                                             , "password" -> msg.password )
       case DisconnectFromChannel => Json.obj("message" -> "disconnect")
       case msg: SendToChannel => Json.obj( "message" -> "send-to-channel" 
-                                         , "event" -> msg.event )
+                                         , "event" -> Json.obj("id" -> msg.eventId, "content" -> msg.eventContent) )
 
       case ConnectedEvent => Json.obj("message" -> "connected")
       case DisconnectedEvent => Json.obj("message" -> "disconnected")
@@ -136,8 +136,9 @@ object WebSocketActor {
   }
 
   def sendToChannelFromJson(jsval:JsValue): JsResult[SendToChannel] = { 
-    val event = (jsval \ "event").as[String]
-    JsSuccess(SendToChannel(event))
+    val eventId = (jsval \ "event" \ "id").as[String]
+    val eventContent = (jsval \ "event" \ "content").as[String]
+    JsSuccess(SendToChannel(eventId, eventContent))
   }
 
   def channelEventFromJson(jsval:JsValue): JsResult[ChannelEvent] = { 
@@ -157,7 +158,7 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   /** Disconnected from channel */
   def disconnected: Actor.Receive = {
     
-    case SendToChannel(msg) =>
+    case SendToChannel(eventId, eventContent) =>
       socket ! NotConnectedError
     
     case ConnectToChannel(channel, device, password) =>
@@ -182,8 +183,8 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   /** Process messages while connected to the channel */
   def connected(channel: ActorRef): Actor.Receive = {
     
-    case SendToChannel(msg) =>
-      channel ! msg
+    case SendToChannel(eventId, eventContent) =>
+      channel ! eventId
     
     case DisconnectFromChannel =>
       channel ! ChannelActor.RemoveListener

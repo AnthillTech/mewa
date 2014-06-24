@@ -34,7 +34,7 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
     "not be connected to the channel" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! SendToChannel("") 
+      wsActor ! SendToChannel("","") 
       expectMsg(NotConnectedError)
     }
   }

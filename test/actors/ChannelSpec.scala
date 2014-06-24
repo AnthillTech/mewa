@@ -38,7 +38,7 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     "forward message to registered listeners" in {
       val channel = system.actorOf(Props[ChannelActor], name="channelA")
       val testActor = system.actorOf(Props(new TestClientActor(channel)))
-      val msg = Event("my event")
+      val msg = TextEvent("test", "my event")
       channel ! AddListener
       testActor ! msg
       expectMsg(msg)
@@ -47,7 +47,7 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     "not forward message to self" in {
       val channel = system.actorOf(Props[ChannelActor], name="channelB")
       val testActor = system.actorOf(Props(new TestClientActor(channel)))
-      val msg = Event("my event")
+      val msg = TextEvent("test", "my event")
       channel ! AddListener
       channel ! msg
       expectNoMsg

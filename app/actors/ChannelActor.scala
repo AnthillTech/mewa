@@ -18,7 +18,7 @@ object ChannelActor {
   sealed trait ChannelMessage
   case object AddListener extends ChannelMessage
   case object RemoveListener extends ChannelMessage
-  case class Event(content:String) extends ChannelMessage
+  case class TextEvent(id:String, content:String) extends ChannelMessage
 }
 
 
@@ -37,8 +37,8 @@ class ChannelActor() extends Actor with ActorLogging {
     case RemoveListener => 
       context.become(broadcaster(listeners - sender()))
     
-    case Event(content) => 
-      listeners.filter(_ != sender()).map(_ forward Event(content))
+    case TextEvent(id, content) => 
+      listeners.filter(_ != sender()).map(_ forward TextEvent(id, content))
   }
   
   def receive = broadcaster(Set.empty)
