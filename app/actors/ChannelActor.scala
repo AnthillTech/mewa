@@ -19,6 +19,8 @@ object ChannelActor {
   case object AddListener extends ChannelMessage
   case object RemoveListener extends ChannelMessage
   case class TextEvent(id:String, content:String) extends ChannelMessage
+  case class JoinedChannelEvent(deviceName:String) extends ChannelMessage
+  case class LeftChannelEvent(deviceName:String) extends ChannelMessage
 }
 
 
@@ -32,9 +34,13 @@ class ChannelActor() extends Actor with ActorLogging {
   def broadcaster(listeners: Set[ActorRef]): Actor.Receive = {
     
     case AddListener =>
+      val event = JoinedChannelEvent(sender().path.toString)
+      listeners.map(_ ! event)
       context.become(broadcaster(listeners + sender()))
     
     case RemoveListener => 
+      val event = LeftChannelEvent(sender().path.toString)
+      listeners.filter(_ != sender()).map(_ ! event)
       context.become(broadcaster(listeners - sender()))
     
     case TextEvent(id, content) => 
