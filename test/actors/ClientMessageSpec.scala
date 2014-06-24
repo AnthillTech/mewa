@@ -84,12 +84,12 @@ class SendToChannelSpec extends Specification {
     
     val expected = """{ "message":"send-to-channel",
 												"event": { "id":"eventId", "content": "eventContent"} }
-									 """
+									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
       val msg :ClientMessage = SendToChannel("eventId", "eventContent")
       val jsvalue = Json.toJson(msg).toString() 
-      jsvalue must beEqualTo(expected.replaceAll("\\s+", ""))
+      jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
@@ -151,18 +151,20 @@ class ChannelEventSpec extends Specification {
 
   import ClientMessageSpec._
 
-  "NotConnectedError message" should {
+  "ChannelEvent message" should {
     
-    val expected = """{"message":"channel-event","event":"content"}"""
+    val expected = """{ "message":"channel-event",
+												"event": { "id":"eventId", "content": "eventContent"} }
+									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg : ClientMessage = ChannelEvent("content")
+      val msg : ClientMessage = ChannelEvent("eventId", "eventContent")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = ChannelEvent("content")
+      val msg = ChannelEvent("eventId", "eventContent")
       assertFromJson(msg)
     }
   }

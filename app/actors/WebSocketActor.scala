@@ -53,9 +53,9 @@ object WebSocketActor {
   /** 
    *  Notify client about new event send by other clients to the connected channel 
    *  JSON format: 
-   *  {"message": "channel-event", "event":"event content"}  
+   *  {"message": "channel-event", "event":{"id": "eventId", "content":"event content"}}
    */
-  case class ChannelEvent(event: String) extends ClientMessage
+  case class ChannelEvent(eventId: String, eventContent: String) extends ClientMessage
   
   /** 
    *  Client can be connected only to one channel at the time. 
@@ -103,7 +103,7 @@ object WebSocketActor {
       case ConnectedEvent => Json.obj("message" -> "connected")
       case DisconnectedEvent => Json.obj("message" -> "disconnected")
       case msg:ChannelEvent => Json.obj( "message" -> "channel-event"
-                                       , "event" -> msg.event )
+                                       , "event" -> Json.obj("id" -> msg.eventId, "content" -> msg.eventContent) )
 
       case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
       case AuthorizationError => Json.obj("message" -> "authorization-error")
@@ -142,8 +142,9 @@ object WebSocketActor {
   }
 
   def channelEventFromJson(jsval:JsValue): JsResult[ChannelEvent] = { 
-    val event = (jsval \ "event").as[String]
-    JsSuccess(ChannelEvent(event))
+    val eventId = (jsval \ "event" \ "id").as[String]
+    val eventContent = (jsval \ "event" \ "content").as[String]
+    JsSuccess(ChannelEvent(eventId, eventContent))
   }
 }
 
@@ -184,7 +185,10 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   def connected(channel: ActorRef): Actor.Receive = {
     
     case SendToChannel(eventId, eventContent) =>
-      channel ! eventId
+      channel ! ChannelActor.TextEvent(eventId, eventContent)
+      
+    case ChannelActor.TextEvent(eventId, eventContent) =>
+      socket ! ChannelEvent(eventId, eventContent)
     
     case DisconnectFromChannel =>
       channel ! ChannelActor.RemoveListener
