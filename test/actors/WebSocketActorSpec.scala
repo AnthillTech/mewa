@@ -8,6 +8,10 @@ import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll
 import akka.testkit.ImplicitSender
+import akka.actor.ActorRef
+import actors.ChannelActor.AddListener
+import actors.ChannelActor.LeftChannelEvent
+import akka.actor.PoisonPill
 
 
 /**
@@ -30,7 +34,8 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
   import WebSocketActor._
   
-  "New socket" should {
+  
+ "New socket" should {
  
     "not be connected to the channel" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
@@ -57,6 +62,29 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       val wsActor = system.actorOf(WebSocketActor.props(self))
       wsActor ! ConnectToChannel("test1", "dev1", "pass1")
       expectMsg(ConnectedEvent)
+    }
+  }
+  
+  "Connected socket" should {
+ 
+    "remove its listener from channel on disconnect" in {
+      val socket1 = system.actorOf(WebSocketActor.props(self))
+      socket1 ! ConnectToChannel("test1", "dev1", "pass1")
+      expectMsg(ConnectedEvent)
+      val channel = system.actorSelection("/user/channel-manager/test1")
+      channel ! AddListener
+      socket1 ! DisconnectFromChannel
+      expectMsgType[LeftChannelEvent]
+    }
+ 
+    "remove its listener when stopped" in {
+      val socket1 = system.actorOf(WebSocketActor.props(self))
+      socket1 ! ConnectToChannel("test2", "dev1", "pass1")
+      expectMsg(ConnectedEvent)
+      val channel = system.actorSelection("/user/channel-manager/test2")
+      channel ! AddListener
+      system.stop(socket1)
+      expectMsgType[LeftChannelEvent]
     }
   }
 }

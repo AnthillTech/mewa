@@ -15,14 +15,6 @@ import akka.actor.ActorSelection
 import actors.ChannelActor._
 
 
-/* Test actor for sending events */
-class TestClientActor(channel: ActorRef) extends Actor{
-  def receive = {
-    case msg => channel ! msg
-  }
-}
-
-
 @RunWith(classOf[JUnitRunner])
 class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
             with WordSpecLike with Matchers with BeforeAndAfterAll {
@@ -33,6 +25,14 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     TestKit.shutdownActorSystem(system)
   }
  
+  /* Test actor for sending events */
+  class TestClientActor(channel: ActorRef) extends Actor{
+    def receive = {
+      case msg => channel ! msg
+    }
+  }
+
+  
   "Channel" should {
  
     "forward message to registered listeners" in {

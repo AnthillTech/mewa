@@ -10,6 +10,7 @@
  
     <button id="connectChannel">Connect to channel</button>
     <button id="disconnectChannel">Disconnect from channel</button>
+    <button id="malformed">Malformed</button>
     <div>Message: <input id="text" type="text"/></div>
  
  	<script>
@@ -85,6 +86,11 @@
  	    	msg = {message: "disconnect"}
  	    	sendMsg(msg)
 	 	});
+        
+        $('#malformed').click(function(){
+            msg = {message: "aaa"}
+            sendMsg(msg)
+        });
     });
  	
  	</script>   

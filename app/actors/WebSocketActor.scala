@@ -10,6 +10,7 @@ import play.api.libs.json.JsSuccess
 import play.api.libs.json.JsSuccess
 import play.api.libs.json.JsValue
 import akka.actor.ActorLogging
+import actors.ChannelActor.RemoveListener
 
 
 
@@ -156,6 +157,8 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
  
   import WebSocketActor._
 
+  var connectedChannel : Option[ActorRef] = None
+  
   /** Disconnected from channel */
   def disconnected: Actor.Receive = {
     
@@ -174,6 +177,7 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
     case ChannelManagerActor.ChannelFound(channel) =>
       channel ! ChannelActor.AddListener
       socket ! ConnectedEvent
+      connectedChannel = Some(channel)
       context.become(connected(channel))
     
     case ChannelManagerActor.AuthorizationError =>
@@ -192,8 +196,13 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
     
     case DisconnectFromChannel =>
       channel ! ChannelActor.RemoveListener
+      connectedChannel = None
+      context.become(disconnected)
   }
   
   def receive = disconnected
   
+  override def postStop = {
+    connectedChannel.map(_ ! RemoveListener)
+  }
 }
