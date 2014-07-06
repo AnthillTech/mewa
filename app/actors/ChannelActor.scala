@@ -27,7 +27,7 @@ object ChannelActor {
 /**
  * Channel actor
  */
-class ChannelActor() extends Actor with ActorLogging {
+class ChannelActor extends Actor with ActorLogging {
 
   import ChannelActor._
   
