@@ -1,4 +1,4 @@
-package actors
+package com.anthill.channels
 
 import akka.actor.{Actor, ActorRef, Props}
 import play.api.mvc.WebSocket.FrameFormatter

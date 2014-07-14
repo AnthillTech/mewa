@@ -1,16 +1,12 @@
 package actors
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorRef, ActorLogging, Props}
 import play.api.mvc.WebSocket.FrameFormatter
 import play.api.libs.json.{__, Format, Writes, Reads, Json, JsError}
 import akka.event.Logging
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsResult
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsValue
-import akka.actor.ActorLogging
-import actors.ChannelActor.RemoveListener
+import play.api.libs.json._
+import com.anthill.channels.ChannelManagerActor
+import com.anthill.channels.ChannelActor
 
 
 
@@ -203,6 +199,6 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   def receive = disconnected
   
   override def postStop = {
-    connectedChannel.map(_ ! RemoveListener)
+    connectedChannel.map(_ ! ChannelActor.RemoveListener)
   }
 }

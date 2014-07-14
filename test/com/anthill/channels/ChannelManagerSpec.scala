@@ -1,4 +1,4 @@
-package actors
+package com.anthill.channels
 
 import akka.actor.ActorSystem
 import akka.actor.Actor
@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import akka.actor.ActorRef
 import akka.actor.ActorSelection
+import com.anthill.channels.ChannelManagerActor._
 
 
 
@@ -29,8 +30,6 @@ class ChannelManagerSpec(_system: ActorSystem) extends TestKit(_system) with Imp
     TestKit.shutdownActorSystem(system)
   }
   
-  import ChannelManagerActor._
- 
   "ChannelManager" should {
  
     "refuse connection with invalid channel name" in {

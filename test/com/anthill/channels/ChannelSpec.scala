@@ -1,18 +1,13 @@
-package actors
+package com.anthill.channels
 
-import akka.actor.ActorSystem
-import akka.actor.Actor
-import akka.actor.Props
+import akka.actor.{ActorSystem, Actor, Props, ActorRef, ActorSelection}
 import akka.testkit.TestKit
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{WordSpecLike, Matchers, BeforeAndAfterAll}
 import akka.testkit.ImplicitSender
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import akka.actor.ActorRef
-import akka.actor.ActorSelection
-import actors.ChannelActor._
+import com.anthill.channels.ChannelActor._
+
 
 
 @RunWith(classOf[JUnitRunner])

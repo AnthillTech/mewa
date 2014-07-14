@@ -1,17 +1,12 @@
 package actors
 
-import akka.actor.ActorSystem
-import akka.actor.Actor
-import akka.actor.Props
+import akka.actor.{ActorSystem, Actor, Props, ActorRef, PoisonPill}
 import akka.testkit.TestKit
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
-import org.scalatest.BeforeAndAfterAll
 import akka.testkit.ImplicitSender
-import akka.actor.ActorRef
-import actors.ChannelActor.AddListener
-import actors.ChannelActor.LeftChannelEvent
-import akka.actor.PoisonPill
+import org.scalatest.{WordSpecLike, Matchers, BeforeAndAfterAll}
+import com.anthill.channels.ChannelManagerActor
+import com.anthill.channels.ChannelActor._
+
 
 
 /**

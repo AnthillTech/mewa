@@ -1,14 +1,8 @@
-package actors
+package com.anthill.channels
 
 import akka.actor.{Actor, ActorRef, Props}
-import play.api.mvc.WebSocket.FrameFormatter
-import play.api.libs.json.{__, Format, Writes, Reads, Json, JsError}
-import akka.event.Logging
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsResult
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsSuccess
 import akka.actor.ActorLogging
+import akka.actor.actorRef2Scala
 
 
 

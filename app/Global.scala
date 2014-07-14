@@ -5,7 +5,8 @@ import play.api.mvc.Results._
 import scala.concurrent.Future
 import play.libs.Akka
 import akka.actor.Props
-import actors.ChannelManagerActor
+import com.anthill.channels.ChannelManagerActor
+
 
 object Global extends GlobalSettings {
 
