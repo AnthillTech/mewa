@@ -50,9 +50,9 @@ object WebSocketActor {
   /** 
    *  Notify client about new event send by other clients to the connected channel 
    *  JSON format: 
-   *  {"message": "channel-event", "event":{"id": "eventId", "content":"event content"}}
+   *  {"message": "channel-event", "event":{"device": "source", "id": "eventId", "content":"event content"}}
    */
-  case class ChannelEvent(eventId: String, eventContent: String) extends ClientMessage
+  case class ChannelEvent(deviceName: String, eventId: String, eventContent: String) extends ClientMessage
   
   /** 
    *  Client can be connected only to one channel at the time. 
@@ -100,7 +100,9 @@ object WebSocketActor {
       case ConnectedEvent => Json.obj("message" -> "connected")
       case DisconnectedEvent => Json.obj("message" -> "disconnected")
       case msg:ChannelEvent => Json.obj( "message" -> "channel-event"
-                                       , "event" -> Json.obj("id" -> msg.eventId, "content" -> msg.eventContent) )
+                                       , "event" -> Json.obj( "device" -> msg.deviceName
+                                                            , "id" -> msg.eventId
+                                                            , "content" -> msg.eventContent) )
 
       case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
       case AuthorizationError => Json.obj("message" -> "authorization-error")
@@ -139,9 +141,10 @@ object WebSocketActor {
   }
 
   def channelEventFromJson(jsval:JsValue): JsResult[ChannelEvent] = { 
+    val deviceName = (jsval \ "event" \ "device").as[String]
     val eventId = (jsval \ "event" \ "id").as[String]
     val eventContent = (jsval \ "event" \ "content").as[String]
-    JsSuccess(ChannelEvent(eventId, eventContent))
+    JsSuccess(ChannelEvent(deviceName, eventId, eventContent))
   }
 }
 
@@ -154,6 +157,7 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   import WebSocketActor._
 
   var connectedChannel : Option[ActorRef] = None
+  var deviceName: String = ""
   
   /** Disconnected from channel */
   def disconnected: Actor.Receive = {
@@ -164,14 +168,15 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
     case ConnectToChannel(channel, device, password) =>
       val manager = context.actorSelection("/user/channel-manager")
       manager ! ChannelManagerActor.GetChannel(channel, device, password)
-      context.become(connecting)
+      deviceName = device
+      context.become(connecting())
   }
 
   /** Trying to connect */
-  def connecting: Actor.Receive = {
+  def connecting(): Actor.Receive = {
     
     case ChannelManagerActor.ChannelFound(channel) =>
-      channel ! ChannelActor.AddListener
+      channel ! ChannelActor.RegisterDevice(deviceName)
       socket ! ConnectedEvent
       connectedChannel = Some(channel)
       context.become(connected(channel))
@@ -185,13 +190,19 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   def connected(channel: ActorRef): Actor.Receive = {
     
     case SendToChannel(eventId, eventContent) =>
-      channel ! ChannelActor.TextEvent(eventId, eventContent)
+      channel ! ChannelActor.DeviceEvent(deviceName, eventId, eventContent)
       
-    case ChannelActor.TextEvent(eventId, eventContent) =>
-      socket ! ChannelEvent(eventId, eventContent)
+    case ChannelActor.DeviceEvent(deviceName, eventId, eventContent) =>
+      socket ! ChannelEvent(deviceName, eventId, eventContent)
+      
+    case ChannelActor.JoinedChannelEvent(deviceName) =>
+      socket ! ChannelEvent(deviceName, "Device joined channel", "")
+      
+    case ChannelActor.LeftChannelEvent(deviceName) =>
+      socket ! ChannelEvent(deviceName, "Device left channel", "")
     
     case DisconnectFromChannel =>
-      channel ! ChannelActor.RemoveListener
+      channel ! ChannelActor.UnRegisterDevice(deviceName)
       connectedChannel = None
       context.become(disconnected)
   }
@@ -199,6 +210,6 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   def receive = disconnected
   
   override def postStop = {
-    connectedChannel.map(_ ! ChannelActor.RemoveListener)
+    connectedChannel.map(_ ! ChannelActor.UnRegisterDevice(deviceName))
   }
 }

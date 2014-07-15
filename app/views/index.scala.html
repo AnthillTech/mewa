@@ -17,6 +17,7 @@
  	
  	$(document).ready(function() {
  	 
+ 		var deviceName = "device" + (Math.floor(Math.random() * 100));
     	var socket = new WebSocket("@routes.Application.ws.webSocketURL()");
 
     	connect();
@@ -78,7 +79,7 @@
 	 	}
 	 	
 	 	$('#connectChannel').click(function(){
- 	    	msg = {message: "connect", channel:"channel1", device:"device1", password:"pass1"}
+ 	    	msg = {message: "connect", channel:"channel1", device:deviceName, password:"pass1"}
  	    	sendMsg(msg)
 	 	});
 	 	

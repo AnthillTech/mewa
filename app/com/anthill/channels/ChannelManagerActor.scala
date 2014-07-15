@@ -1,8 +1,7 @@
 package com.anthill.channels
 
-import akka.actor.{Actor, ActorRef, Props}
-import akka.actor.ActorLogging
-import akka.actor.actorRef2Scala
+import akka.actor.{Actor, ActorRef, Props, ActorLogging}
+
 
 
 

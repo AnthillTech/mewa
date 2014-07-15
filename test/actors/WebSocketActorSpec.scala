@@ -67,7 +67,7 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       socket1 ! ConnectToChannel("test1", "dev1", "pass1")
       expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test1")
-      channel ! AddListener
+      channel ! RegisterDevice("testDevice")
       socket1 ! DisconnectFromChannel
       expectMsgType[LeftChannelEvent]
     }
@@ -77,7 +77,7 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       socket1 ! ConnectToChannel("test2", "dev1", "pass1")
       expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test2")
-      channel ! AddListener
+      channel ! RegisterDevice("testDevice")
       system.stop(socket1)
       expectMsgType[LeftChannelEvent]
     }

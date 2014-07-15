@@ -154,17 +154,17 @@ class ChannelEventSpec extends Specification {
   "ChannelEvent message" should {
     
     val expected = """{ "message":"channel-event",
-												"event": { "id":"eventId", "content": "eventContent"} }
+												"event": { "device":"device1", "id":"eventId", "content": "eventContent"} }
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg : ClientMessage = ChannelEvent("eventId", "eventContent")
+      val msg : ClientMessage = ChannelEvent("device1", "eventId", "eventContent")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = ChannelEvent("eventId", "eventContent")
+      val msg = ChannelEvent("device1", "eventId", "eventContent")
       assertFromJson(msg)
     }
   }

@@ -14,13 +14,20 @@ import scala.collection.Set
 
 
 object ChannelActor {
+  
+  //type Id = String
+//  case class DeviceInfo(name: String, supportedMessages: [String], supportedEvents: [String])
 
-  sealed trait ChannelMessage
-  case object AddListener extends ChannelMessage
-  case object RemoveListener extends ChannelMessage
-  case class TextEvent(id:String, content:String) extends ChannelMessage
-  case class JoinedChannelEvent(deviceName:String) extends ChannelMessage
-  case class LeftChannelEvent(deviceName:String) extends ChannelMessage
+  case class RegisterDevice(deviceName: String)
+  case class UnRegisterDevice(deviceName: String)
+  case class DeviceEvent(deviceName: String, eventId:String, content:String)
+  case class Message(fromDevice: String, targetDevice: String, messageId: String, params: String)
+//  case object GetConnectedDevices  // Returns ConnectedDevices
+//  case class ConnectedDevices(names: [String])
+//  case class GetDevice(deviceName: String)
+  
+  case class JoinedChannelEvent(deviceName:String)
+  case class LeftChannelEvent(deviceName:String)
 }
 
 
@@ -31,21 +38,24 @@ class ChannelActor extends Actor with ActorLogging {
 
   import ChannelActor._
   
-  def broadcaster(listeners: Set[ActorRef]): Actor.Receive = {
+  def broadcaster(devices: Map[String,ActorRef]): Actor.Receive = {
     
-    case AddListener =>
-      val event = JoinedChannelEvent(sender().path.toString)
-      listeners.map(_ ! event)
-      context.become(broadcaster(listeners + sender()))
+    case RegisterDevice(name) =>
+      val event = JoinedChannelEvent(name)
+      devices.values foreach (_ ! event)
+      context.become(broadcaster(devices + (name -> sender)))
     
-    case RemoveListener => 
-      val event = LeftChannelEvent(sender().path.toString)
-      listeners.filter(_ != sender()).map(_ ! event)
-      context.become(broadcaster(listeners - sender()))
+    case UnRegisterDevice(name) => 
+      val event = LeftChannelEvent(name)
+      devices.filterKeys(_ != name).values foreach (_ ! event)
+      context.become(broadcaster(devices - name))
     
-    case TextEvent(id, content) => 
-      listeners.filter(_ != sender()).map(_ forward TextEvent(id, content))
+    case event @ DeviceEvent(name, id, content) =>
+      devices.filterKeys(_ != name).values.foreach(_ forward event)
+    
+    case event @ Message(from, target, messageId, params) =>
+      devices.get(target) foreach (_ forward event)
   }
   
-  def receive = broadcaster(Set.empty)
+  def receive = broadcaster(Map.empty)
 }

@@ -33,16 +33,16 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     "forward message to registered listeners" in {
       val channel = system.actorOf(Props[ChannelActor])
       val testActor = system.actorOf(Props(new TestClientActor(channel)))
-      val msg = TextEvent("test", "my event")
-      channel ! AddListener
+      channel ! RegisterDevice("testDevice")
+      val msg = DeviceEvent("testDevice2", "test", "my event")
       testActor ! msg
       expectMsg(msg)
     }
  
     "not forward message to self" in {
       val channel = system.actorOf(Props[ChannelActor])
-      val msg = TextEvent("test", "my event")
-      channel ! AddListener
+      val msg = DeviceEvent("testDevice", "test", "my event")
+      channel ! RegisterDevice("testDevice")
       channel ! msg
       expectNoMsg
     }
@@ -50,19 +50,30 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
     "send Join event when new actors adds listener" in {
       val channel = system.actorOf(Props[ChannelActor])
       val testActor = system.actorOf(Props(new TestClientActor(channel)))
-      channel ! AddListener
-      testActor ! AddListener
+      channel ! RegisterDevice("testDevice")
+      testActor ! RegisterDevice("testDevice2")
       expectMsgType[JoinedChannelEvent]
     }
  
     "send Left event when new actors removes listener" in {
       val channel = system.actorOf(Props[ChannelActor])
       val testActor = system.actorOf(Props(new TestClientActor(channel)))
-      channel ! AddListener
-      testActor ! AddListener
+      channel ! RegisterDevice("testDevice")
+      testActor ! RegisterDevice("testDevice2")
       expectMsgType[JoinedChannelEvent]
-      testActor ! RemoveListener
+      testActor ! UnRegisterDevice("testDevice2")
       expectMsgType[LeftChannelEvent]
+    }
+ 
+    "send forward messages to devices" in {
+      val channel = system.actorOf(Props[ChannelActor])
+      val testActor = system.actorOf(Props(new TestClientActor(channel)))
+      channel ! RegisterDevice("testDevice")
+      testActor ! RegisterDevice("testActor")
+      expectMsgType[JoinedChannelEvent]
+      val msg = Message("testActor", "testDevice", "1", "")
+      testActor ! msg
+      expectMsg(msg)
     }
   }
 }
