@@ -101,6 +101,31 @@ class SendToChannelSpec extends Specification {
 
 
 @RunWith(classOf[JUnitRunner])
+class SendToDeviceSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "SendToDevice message" should {
+    
+    val expected = """{ "message":"send-to-device",
+												"event": { "device":"device1", "id":"msg1", "params": "messageParams"} }
+									 """.replaceAll("\\s+", "")
+    
+    "serialize to json" in {
+      val msg :ClientMessage = SendToDevice("device1", "msg1", "messageParams")
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = SendToDevice("device1", "msg1", "messageParams")
+      assertFromJson(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
 class ConnectedEventSpec extends Specification {
 
   import ClientMessageSpec._
@@ -169,6 +194,32 @@ class ChannelEventSpec extends Specification {
     }
   }
 }
+
+
+@RunWith(classOf[JUnitRunner])
+class MessageEventSpec extends Specification {
+
+  import ClientMessageSpec._
+
+  "MessageEvent message" should {
+    
+    val expected = """{ "message":"message-event",
+												"event": { "device":"device1", "id":"msg1", "params": "params1"} }
+									 """.replaceAll("\\s+", "")
+    
+    "serialize to json" in {
+      val msg : ClientMessage = MessageEvent("device1", "msg1", "params1")
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = MessageEvent("device1", "msg1", "params1")
+      assertFromJson(msg)
+    }
+  }
+}
+
 
 @RunWith(classOf[JUnitRunner])
 class AlreadyConnectedErrorSpec extends Specification {

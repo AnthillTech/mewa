@@ -34,6 +34,12 @@ object WebSocketActor {
    *  {"message": "send-to-channel", "event":{"id": "eventId", "content":"event content"}}  
    */
   case class SendToChannel(eventId: String, eventContent: String) extends ClientMessage
+  /** 
+   *  Send message to specific device 
+   *  JSON format: 
+   *  {"message": "send-to-device", "event":{"device": "deviceName", "id": "messageId", "params":"message parameters"}}
+   */
+  case class SendToDevice(targetDevice: String, messageId: String, params: String) extends ClientMessage
   
   /** 
    *  Notify client that it was successfully connected to the channel. 
@@ -53,6 +59,12 @@ object WebSocketActor {
    *  {"message": "channel-event", "event":{"device": "source", "id": "eventId", "content":"event content"}}
    */
   case class ChannelEvent(deviceName: String, eventId: String, eventContent: String) extends ClientMessage
+  /** 
+   *  Notify client about message send from other device 
+   *  JSON format: 
+   *  {"message": "message-event", "event":{"device": "source", "id": "messageId", "params":"message params"}}
+   */
+  case class MessageEvent(fromDevice: String, messageId: String, params: String) extends ClientMessage
   
   /** 
    *  Client can be connected only to one channel at the time. 
@@ -96,6 +108,8 @@ object WebSocketActor {
       case DisconnectFromChannel => Json.obj("message" -> "disconnect")
       case msg: SendToChannel => Json.obj( "message" -> "send-to-channel" 
                                          , "event" -> Json.obj("id" -> msg.eventId, "content" -> msg.eventContent) )
+      case msg: SendToDevice => Json.obj( "message" -> "send-to-device" 
+                                        , "event" -> Json.obj("device" -> msg.targetDevice, "id" -> msg.messageId, "params" -> msg.params) )
 
       case ConnectedEvent => Json.obj("message" -> "connected")
       case DisconnectedEvent => Json.obj("message" -> "disconnected")
@@ -103,6 +117,10 @@ object WebSocketActor {
                                        , "event" -> Json.obj( "device" -> msg.deviceName
                                                             , "id" -> msg.eventId
                                                             , "content" -> msg.eventContent) )
+      case msg:MessageEvent => Json.obj( "message" -> "message-event"
+                                       , "event" -> Json.obj( "device" -> msg.fromDevice
+                                                            , "id" -> msg.messageId
+                                                            , "params" -> msg.params) )
 
       case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
       case AuthorizationError => Json.obj("message" -> "authorization-error")
@@ -117,9 +135,11 @@ object WebSocketActor {
       case "connect" => connectFromJson(jsval)
       case "disconnect" => JsSuccess(DisconnectFromChannel)
       case "send-to-channel" => sendToChannelFromJson(jsval)
+      case "send-to-device" => sendToDeviceFromJson(jsval)
       case "connected" => JsSuccess(ConnectedEvent)
       case "disconnected" => JsSuccess(DisconnectedEvent)
       case "channel-event" => channelEventFromJson(jsval)
+      case "message-event" => messageEventFromJson(jsval)
       case "already-connected-error" => JsSuccess(AlreadyConnectedError)
       case "authorization-error" => JsSuccess(AuthorizationError)
       case "not-connected-error" => JsSuccess(NotConnectedError)
@@ -140,11 +160,25 @@ object WebSocketActor {
     JsSuccess(SendToChannel(eventId, eventContent))
   }
 
+  def sendToDeviceFromJson(jsval:JsValue): JsResult[SendToDevice] = { 
+    val device = (jsval \ "event" \ "device").as[String]
+    val messageId = (jsval \ "event" \ "id").as[String]
+    val params = (jsval \ "event" \ "params").as[String]
+    JsSuccess(SendToDevice(device, messageId, params))
+  }
+
   def channelEventFromJson(jsval:JsValue): JsResult[ChannelEvent] = { 
     val deviceName = (jsval \ "event" \ "device").as[String]
     val eventId = (jsval \ "event" \ "id").as[String]
     val eventContent = (jsval \ "event" \ "content").as[String]
     JsSuccess(ChannelEvent(deviceName, eventId, eventContent))
+  }
+
+  def messageEventFromJson(jsval:JsValue): JsResult[MessageEvent] = { 
+    val deviceName = (jsval \ "event" \ "device").as[String]
+    val msgId = (jsval \ "event" \ "id").as[String]
+    val params = (jsval \ "event" \ "params").as[String]
+    JsSuccess(MessageEvent(deviceName, msgId, params))
   }
 }
 
@@ -210,6 +244,6 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   def receive = disconnected
   
   override def postStop = {
-    connectedChannel.map(_ ! ChannelActor.UnRegisterDevice(deviceName))
+    connectedChannel foreach {_ ! ChannelActor.UnRegisterDevice(deviceName)}
   }
 }

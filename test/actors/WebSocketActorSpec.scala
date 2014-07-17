@@ -6,7 +6,11 @@ import akka.testkit.ImplicitSender
 import org.scalatest.{WordSpecLike, Matchers, BeforeAndAfterAll}
 import com.anthill.channels.ChannelManagerActor
 import com.anthill.channels.ChannelActor._
-
+import akka.util.Timeout
+import akka.testkit.TestProbe
+import scala.concurrent.duration._
+import akka.actor.Identify
+import akka.actor.ActorIdentity
 
 
 /**
@@ -63,23 +67,31 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   "Connected socket" should {
  
     "remove its listener from channel on disconnect" in {
-      val socket1 = system.actorOf(WebSocketActor.props(self))
-      socket1 ! ConnectToChannel("test1", "dev1", "pass1")
-      expectMsg(ConnectedEvent)
+      val probe = TestProbe()
+      val socket1 = system.actorOf(WebSocketActor.props(probe.ref))
+      probe.send(socket1, ConnectToChannel("test1", "dev1", "pass1"))
+      probe.expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test1")
       channel ! RegisterDevice("testDevice")
-      socket1 ! DisconnectFromChannel
-      expectMsgType[LeftChannelEvent]
+      probe.send(socket1, DisconnectFromChannel)
+      fishForMessage() {
+        case LeftChannelEvent("dev1") => true
+        case m => false
+      }
     }
  
     "remove its listener when stopped" in {
-      val socket1 = system.actorOf(WebSocketActor.props(self))
-      socket1 ! ConnectToChannel("test2", "dev1", "pass1")
-      expectMsg(ConnectedEvent)
+      val probe = TestProbe()
+      val socket1 = system.actorOf(WebSocketActor.props(probe.ref))
+      probe.send(socket1, ConnectToChannel("test2", "dev1", "pass1"))
+      probe.expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test2")
       channel ! RegisterDevice("testDevice")
       system.stop(socket1)
-      expectMsgType[LeftChannelEvent]
+      fishForMessage() {
+        case LeftChannelEvent("dev1") => true
+        case m => false
+      }
     }
   }
 }
