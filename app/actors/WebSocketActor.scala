@@ -23,11 +23,25 @@ object WebSocketActor {
    */
   case class ConnectToChannel(channel: String, device: String, password: String) extends ClientMessage
   /** 
+   *  Notify client that it was successfully connected to the channel. 
+   *  JSON format: 
+   *  {"message": "connected"}  
+   */
+  case object ConnectedEvent extends ClientMessage
+  
+  /** 
    *  Disconnect from channel.
    *  JSON format: 
    *  {"message": "disconnect"}  
    */
   case object DisconnectFromChannel extends ClientMessage
+  /** 
+   *  Notify client that it was disconnected from channel. 
+   *  JSON format: 
+   *  {"message": "disconnected"}  
+   */
+  case object DisconnectedEvent extends ClientMessage
+
   /** 
    *  Send event to the channel 
    *  JSON format: 
@@ -35,36 +49,47 @@ object WebSocketActor {
    */
   case class SendToChannel(eventId: String, eventContent: String) extends ClientMessage
   /** 
-   *  Send message to specific device 
-   *  JSON format: 
-   *  {"message": "send-to-device", "event":{"device": "deviceName", "id": "messageId", "params":"message parameters"}}
-   */
-  case class SendToDevice(targetDevice: String, messageId: String, params: String) extends ClientMessage
-  
-  /** 
-   *  Notify client that it was successfully connected to the channel. 
-   *  JSON format: 
-   *  {"message": "connected"}  
-   */
-  case object ConnectedEvent extends ClientMessage
-  /** 
-   *  Notify client that it was disconnected from channel. 
-   *  JSON format: 
-   *  {"message": "disconnected"}  
-   */
-  case object DisconnectedEvent extends ClientMessage
-  /** 
    *  Notify client about new event send by other clients to the connected channel 
    *  JSON format: 
    *  {"message": "channel-event", "event":{"device": "source", "id": "eventId", "content":"event content"}}
    */
   case class ChannelEvent(deviceName: String, eventId: String, eventContent: String) extends ClientMessage
   /** 
+   *  Send message to specific device 
+   *  JSON format: 
+   *  {"message": "send-to-device", "event":{"device": "deviceName", "id": "messageId", "params":"message parameters"}}
+   */
+  case class SendToDevice(targetDevice: String, messageId: String, params: String) extends ClientMessage
+  /** 
    *  Notify client about message send from other device 
    *  JSON format: 
    *  {"message": "message-event", "event":{"device": "source", "id": "messageId", "params":"message params"}}
    */
   case class MessageEvent(fromDevice: String, messageId: String, params: String) extends ClientMessage
+  /** 
+   *  Ask for list of all connect to the channel devices. 
+   *  JSON format: 
+   *  {"message": "get-devices"}  
+   */
+  case object GetDevices extends ClientMessage
+  /** 
+   *  Event with list of all connected devices 
+   *  JSON format: 
+   *  {"message": "devices-event", "devices":["device1", "device2"]}  
+   */
+  case class DevicesEvent(names: Seq[String]) extends ClientMessage
+  /** 
+   *  Ask for info about device 
+   *  JSON format: 
+   *  {"message": "get-device-info", "device":"device1"}  
+   */
+  case class GetDeviceInfo(deviceName: String) extends ClientMessage
+  /** 
+   *  Information about device 
+   *  JSON format: 
+   *  {"message": "device-info", "device":{"name":"device1", "events":["event1", "event2"], "commands":["cmd1", "cmd2"]}}  
+   */
+  case class DeviceInfo(deviceName: String, supportedEvents: Seq[String], supportedCommands: Seq[String]) extends ClientMessage
   
   /** 
    *  Client can be connected only to one channel at the time. 
@@ -110,6 +135,8 @@ object WebSocketActor {
                                          , "event" -> Json.obj("id" -> msg.eventId, "content" -> msg.eventContent) )
       case msg: SendToDevice => Json.obj( "message" -> "send-to-device" 
                                         , "event" -> Json.obj("device" -> msg.targetDevice, "id" -> msg.messageId, "params" -> msg.params) )
+      case GetDevices => Json.obj("message" -> "get-devices")
+      case msg:GetDeviceInfo => Json.obj("message" -> "get-device-info", "device" -> msg.deviceName)
 
       case ConnectedEvent => Json.obj("message" -> "connected")
       case DisconnectedEvent => Json.obj("message" -> "disconnected")
@@ -121,6 +148,12 @@ object WebSocketActor {
                                        , "event" -> Json.obj( "device" -> msg.fromDevice
                                                             , "id" -> msg.messageId
                                                             , "params" -> msg.params) )
+      case msg:DevicesEvent => Json.obj("message" -> "devices-event", "devices" -> msg.names)                                                                                                                        
+      case msg:DeviceInfo => Json.obj( "message" -> "device-info"
+                                     , "device" -> Json.obj( "name" -> msg.deviceName
+                                                            , "events" -> msg.supportedEvents
+                                                            , "commands" -> msg.supportedCommands) )
+      
 
       case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
       case AuthorizationError => Json.obj("message" -> "authorization-error")
@@ -136,10 +169,14 @@ object WebSocketActor {
       case "disconnect" => JsSuccess(DisconnectFromChannel)
       case "send-to-channel" => sendToChannelFromJson(jsval)
       case "send-to-device" => sendToDeviceFromJson(jsval)
+      case "get-devices" => JsSuccess(GetDevices)
+      case "get-device-info" => getDeviceInfoFromJson(jsval)
       case "connected" => JsSuccess(ConnectedEvent)
       case "disconnected" => JsSuccess(DisconnectedEvent)
       case "channel-event" => channelEventFromJson(jsval)
       case "message-event" => messageEventFromJson(jsval)
+      case "devices-event" => devicesEventFromJson(jsval)
+      case "device-info" => deviceInfoFromJson(jsval)
       case "already-connected-error" => JsSuccess(AlreadyConnectedError)
       case "authorization-error" => JsSuccess(AuthorizationError)
       case "not-connected-error" => JsSuccess(NotConnectedError)
@@ -179,6 +216,23 @@ object WebSocketActor {
     val msgId = (jsval \ "event" \ "id").as[String]
     val params = (jsval \ "event" \ "params").as[String]
     JsSuccess(MessageEvent(deviceName, msgId, params))
+  }
+
+  def getDeviceInfoFromJson(jsval:JsValue): JsResult[GetDeviceInfo] = { 
+    val deviceName = (jsval \ "device").as[String]
+    JsSuccess(GetDeviceInfo(deviceName))
+  }
+
+  def devicesEventFromJson(jsval:JsValue): JsResult[DevicesEvent] = { 
+    val deviceNames = (jsval \ "devices").as[List[String]]
+    JsSuccess(DevicesEvent(deviceNames))
+  }
+
+  def deviceInfoFromJson(jsval:JsValue): JsResult[DeviceInfo] = { 
+    val name = (jsval \ "device" \ "name").as[String]
+    val events = (jsval \ "device" \ "events").as[List[String]]
+    val commands = (jsval \ "device" \ "commands").as[List[String]]
+    JsSuccess(DeviceInfo(name, events, commands))
   }
 }
 
