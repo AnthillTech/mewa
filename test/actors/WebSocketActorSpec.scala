@@ -76,7 +76,7 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       probe.send(socket1, DisconnectFromChannel)
       fishForMessage() {
         case LeftChannelEvent("dev1") => true
-        case m => false
+        case _ => false
       }
     }
  
@@ -90,7 +90,23 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       system.stop(socket1)
       fishForMessage() {
         case LeftChannelEvent("dev1") => true
-        case m => false
+        case _ => false
+      }
+    }
+ 
+    "send message to other socket" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val socket1 = system.actorOf(WebSocketActor.props(probe1.ref))
+      val socket2 = system.actorOf(WebSocketActor.props(probe2.ref))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe1.expectMsg(ConnectedEvent)
+      val msg = SendToDevice("probe1", "msg1", "params1")
+      probe1.send(socket1, SendToDevice("probe2", "msg1", "params1"))
+      probe2.fishForMessage() {
+        case MessageEvent("probe1", "msg1", "params1") => true
+        case _ => false
       }
     }
   }
