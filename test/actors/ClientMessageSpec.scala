@@ -270,58 +270,6 @@ class DevicesEventSpec extends Specification {
 
 
 @RunWith(classOf[JUnitRunner])
-class GetDeviceInfoSpec extends Specification {
-
-  import ClientMessageSpec._
-
-  "GetDeviceInfo message" should {
-    
-    val expected = """{ "message":"get-device-info", 
-												"device": "device1"}
-									 """.replaceAll("\\s+", "")
-    
-    "serialize to json" in {
-      val msg : ClientMessage = GetDeviceInfo("device1")
-      val jsvalue = Json.toJson(msg).toString() 
-      jsvalue must beEqualTo(expected)
-    }
-
-    "deserialize from json" in {
-      val msg = GetDeviceInfo("device1")
-      assertFromJson(msg)
-    }
-  }
-}
-
-
-@RunWith(classOf[JUnitRunner])
-class DeviceInfoSpec extends Specification {
-
-  import ClientMessageSpec._
-
-  "DeviceInfo message" should {
-    
-    val expected = """{ "message":"device-info",
-												"device":{"name":"device1", 
-																	"events":["event1", "event2"], 
-																	"commands":["cmd1", "cmd2"] }}
-									 """.replaceAll("\\s+", "")
-    
-    "serialize to json" in {
-      val msg : ClientMessage = DeviceInfo("device1", List("event1", "event2"), List("cmd1", "cmd2")) 
-      val jsvalue = Json.toJson(msg).toString() 
-      jsvalue must beEqualTo(expected)
-    }
-
-    "deserialize from json" in {
-      val msg = DeviceInfo("device1", List("event1", "event2"), List("cmd1", "cmd2"))
-      assertFromJson(msg)
-    }
-  }
-}
-
-
-@RunWith(classOf[JUnitRunner])
 class AlreadyConnectedErrorSpec extends Specification {
 
   import ClientMessageSpec._

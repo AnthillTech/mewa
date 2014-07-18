@@ -78,18 +78,6 @@ object WebSocketActor {
    *  {"message": "devices-event", "devices":["device1", "device2"]}  
    */
   case class DevicesEvent(names: Seq[String]) extends ClientMessage
-  /** 
-   *  Ask for info about device 
-   *  JSON format: 
-   *  {"message": "get-device-info", "device":"device1"}  
-   */
-  case class GetDeviceInfo(deviceName: String) extends ClientMessage
-  /** 
-   *  Information about device 
-   *  JSON format: 
-   *  {"message": "device-info", "device":{"name":"device1", "events":["event1", "event2"], "commands":["cmd1", "cmd2"]}}  
-   */
-  case class DeviceInfo(deviceName: String, supportedEvents: Seq[String], supportedCommands: Seq[String]) extends ClientMessage
   
   /** 
    *  Client can be connected only to one channel at the time. 
@@ -136,7 +124,6 @@ object WebSocketActor {
       case msg: SendToDevice => Json.obj( "message" -> "send-to-device" 
                                         , "event" -> Json.obj("device" -> msg.targetDevice, "id" -> msg.messageId, "params" -> msg.params) )
       case GetDevices => Json.obj("message" -> "get-devices")
-      case msg:GetDeviceInfo => Json.obj("message" -> "get-device-info", "device" -> msg.deviceName)
 
       case ConnectedEvent => Json.obj("message" -> "connected")
       case DisconnectedEvent => Json.obj("message" -> "disconnected")
@@ -149,10 +136,6 @@ object WebSocketActor {
                                                             , "id" -> msg.messageId
                                                             , "params" -> msg.params) )
       case msg:DevicesEvent => Json.obj("message" -> "devices-event", "devices" -> msg.names)                                                                                                                        
-      case msg:DeviceInfo => Json.obj( "message" -> "device-info"
-                                     , "device" -> Json.obj( "name" -> msg.deviceName
-                                                            , "events" -> msg.supportedEvents
-                                                            , "commands" -> msg.supportedCommands) )
       
 
       case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
@@ -170,13 +153,11 @@ object WebSocketActor {
       case "send-to-channel" => sendToChannelFromJson(jsval)
       case "send-to-device" => sendToDeviceFromJson(jsval)
       case "get-devices" => JsSuccess(GetDevices)
-      case "get-device-info" => getDeviceInfoFromJson(jsval)
       case "connected" => JsSuccess(ConnectedEvent)
       case "disconnected" => JsSuccess(DisconnectedEvent)
       case "channel-event" => channelEventFromJson(jsval)
       case "message-event" => messageEventFromJson(jsval)
       case "devices-event" => devicesEventFromJson(jsval)
-      case "device-info" => deviceInfoFromJson(jsval)
       case "already-connected-error" => JsSuccess(AlreadyConnectedError)
       case "authorization-error" => JsSuccess(AuthorizationError)
       case "not-connected-error" => JsSuccess(NotConnectedError)
@@ -218,21 +199,9 @@ object WebSocketActor {
     JsSuccess(MessageEvent(deviceName, msgId, params))
   }
 
-  def getDeviceInfoFromJson(jsval:JsValue): JsResult[GetDeviceInfo] = { 
-    val deviceName = (jsval \ "device").as[String]
-    JsSuccess(GetDeviceInfo(deviceName))
-  }
-
   def devicesEventFromJson(jsval:JsValue): JsResult[DevicesEvent] = { 
     val deviceNames = (jsval \ "devices").as[List[String]]
     JsSuccess(DevicesEvent(deviceNames))
-  }
-
-  def deviceInfoFromJson(jsval:JsValue): JsResult[DeviceInfo] = { 
-    val name = (jsval \ "device" \ "name").as[String]
-    val events = (jsval \ "device" \ "events").as[List[String]]
-    val commands = (jsval \ "device" \ "commands").as[List[String]]
-    JsSuccess(DeviceInfo(name, events, commands))
   }
 }
 

@@ -4,95 +4,91 @@
 
 @main("Websocket test") {
 
-	<h1>WebSockets Client</h1>
- 
-    <div id="chatLog"></div>
- 
-    <button id="connectChannel">Connect to channel</button>
-    <button id="disconnectChannel">Disconnect from channel</button>
-    <button id="malformed">Malformed</button>
-    <div>Message: <input id="text" type="text"/></div>
+	<h1 id="title">Channel tester</h1>
+
+    <div>
+        <span>Channel name:</span>
+        <input id="channelName" type="text" value="test"/>
+        <button id="connectChannel">Connect</button>
+    </div> 
+    <div>
+        <span>Event name</span>
+        <input id="eventName" type="text" value="testEvent"/>
+        <span>Event params</span>
+        <input id="eventParams" type="text" value=""/>
+        <button id="sendEvent">Send</button>
+    </div>
+    <div>
+        <span>Target device</span>
+        <input id="cmdDeviceName" type="text" value="deviceD"/>
+        <span>Command name</span>
+        <input id="cmdName" type="text" value="testCommand"/>
+        <span>Event params</span>
+        <input id="cmdParams" type="text" value=""/>
+        <button id="sendCmd">Send</button>
+    </div>
+    
+    <div id="chatLog" class="chatLog"></div>
  
  	<script>
  	
- 	$(document).ready(function() {
- 	 
- 		var deviceName = "device" + (Math.floor(Math.random() * 100));
-    	var socket = new WebSocket("@routes.Application.ws.webSocketURL()");
+    var deviceName = "device" + (Math.floor(Math.random() * 100));
+    $("#title").text(deviceName);
 
-    	connect();
- 	 
-	 	function connect(){
-	 	    try{
-	 	 
-	 	 
-	 	        message('<p class="event">Socket status: '+socket.readyState);
-	 	 
-	 	        socket.onopen = function(){
-	 	             message('<p class="event">Socket status: '+socket.readyState+' (open)');
-	 	        }
-	 	 
-	 	        socket.onmessage = function(msg){
-	 	             message('<p class="message">Received: '+msg.data);
-	 	        }
-	 	 
-	 	        socket.onclose = function(){
-	 	             message('<p class="event">Socket status: '+socket.readyState+' (Closed)');
-	 	        }          
-	 	 
-	 	    } catch(exception){
-	 	         message('<p>Error'+exception);
-	 	    }
-	 	}
-	 	
-	 	function message(msg){
-	 	    $('#chatLog').append(msg+'</p>');
-	 	}
-	 	
-	 	$('#text').keypress(function(event) {
-	 	    if (event.keyCode == '13') {
-	 	    	sendEvent();
-	 	    }
-	 	});
-	 	
-	 	function sendEvent(){
-	 		 
-	 	    var text = $('#text').val();
-	 	    if(text==""){
-	 	        message('<p class="warning">Please enter a message');
-	 	        return ;
-	 	    }
- 	    	msg = {message: "send-to-channel", event: {id:"chat/1", content: text}}
- 	    	sendMsg(msg)
-	 	    $('#text').val("");
-	 	 
-	 	}
-	 	
-	 	function sendMsg(msg){
-	 	    try{
-	 	    	json = JSON.stringify(msg);
-	 	        socket.send(json);
-	 	        message('<p class="event">Sent: ' + json)
-	 	    } catch(exception){
-		 	    message('<p class="warning"> Error:' + exception);
-	 	    }
-	 	}
-	 	
-	 	$('#connectChannel').click(function(){
- 	    	msg = {message: "connect", channel:"channel1", device:deviceName, password:"pass1"}
- 	    	sendMsg(msg)
-	 	});
-	 	
-	 	$('#disconnectChannel').click(function(){
- 	    	msg = {message: "disconnect"}
- 	    	sendMsg(msg)
-	 	});
-        
-        $('#malformed').click(function(){
-            msg = {message: "aaa"}
-            sendMsg(msg)
-        });
+    var connection = null;
+
+    $('#connectChannel').click(function(){
+    	var channelName = $("#channelName").val()
+    	connection = createConnection(channelName, deviceName, "pass");
     });
+
+    function createConnection(channelName, device, pass){
+        var url = "@routes.Application.ws.webSocketURL()";
+        var connection = channelConnect(url, channelName, device, pass);
+      
+        connection.onConnected = function(){
+          message("Connected");
+        }
+
+        connection.onError = function(reason){
+          message("Error: " + reason);
+        }
+      
+        connection.onEvent = function(id, content){
+            if(id == "picture"){
+                messageImage(chatLog, content);
+            } else {
+                message("Event received. Name: " + id + " params:" + content);
+            }               
+        }
+        
+        connection.onMessage = function(from, id, params){
+            message("Message received from: " + from + " name: " + id + " params:" + params);
+        }
+   
+        return connection;
+      }
+
+    
+      function message(msg){
+          $('#chatLog').append(msg+'</p>');
+      }
+	 	
+      $('#sendEvent').click(function(){
+    	  var eventName = $("#eventName").val();
+    	  var eventParams = $("#eventParams").val();
+    	  connection.sendToChannel(eventName, eventParams);
+      });
+      $('#sendCmd').click(function(){
+    	  var targetDevice = $("#cmdDeviceName").val();
+    	  var command = $("#cmdName").val();
+    	  var params = $("#cmdParams").val();
+          connection.sendToDevice(targetDevice, command, params);
+      });
+      
+      
+      $('#disconnectChannel').click(function(){
+      });
  	
  	</script>   
 }
