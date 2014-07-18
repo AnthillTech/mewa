@@ -27,6 +27,9 @@
         <input id="cmdParams" type="text" value=""/>
         <button id="sendCmd">Send</button>
     </div>
+    <div>
+        <button id="getDevices">Get connected devices</button>
+    </div>
     
     <div id="chatLog" class="chatLog"></div>
  
@@ -65,6 +68,13 @@
         connection.onMessage = function(from, id, params){
             message("Message received from: " + from + " name: " + id + " params:" + params);
         }
+        
+        connection.onDevicesEvent = function(devices){
+        	message("Connected devices:");
+        	for(var i in devices){
+        		message(devices[i]);
+        	}
+        }
    
         return connection;
       }
@@ -84,6 +94,9 @@
     	  var command = $("#cmdName").val();
     	  var params = $("#cmdParams").val();
           connection.sendToDevice(targetDevice, command, params);
+      });
+      $('#getDevices').click(function(){
+          connection.getDevices();
       });
       
       

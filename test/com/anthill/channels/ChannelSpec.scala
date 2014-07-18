@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import com.anthill.channels.ChannelActor._
 import akka.testkit.TestProbe
+import actors.WebSocketActor.GetDevices
 
 
 
@@ -73,6 +74,17 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val msg = Message("probe1", "probe2", "1", "")
       probe1.send(channel, msg)
       probe2.expectMsg(msg)
+    }
+ 
+    "return list of all connected devices" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val channel = system.actorOf(Props[ChannelActor])
+      probe1.send(channel, RegisterDevice("probe1"))
+      probe2.send(channel, RegisterDevice("probe2"))
+      probe1.expectMsgType[JoinedChannelEvent]
+      probe1.send(channel, GetConnectedDevices)
+      probe1.expectMsg(ConnectedDevices(List("probe1", "probe2")))
     }
   }
 }

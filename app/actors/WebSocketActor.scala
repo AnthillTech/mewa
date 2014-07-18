@@ -258,6 +258,12 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
     case ChannelActor.Message(from, dest, msgId, params) =>
       socket ! MessageEvent(from, msgId, params)
       
+    case GetDevices =>
+      channel ! ChannelActor.GetConnectedDevices
+      
+    case ChannelActor.ConnectedDevices(devices) =>
+      socket ! DevicesEvent(devices)
+      
     case ChannelActor.JoinedChannelEvent(deviceName) =>
       socket ! ChannelEvent(deviceName, "Device joined channel", "")
       

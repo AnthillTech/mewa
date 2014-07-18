@@ -109,5 +109,20 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
         case _ => false
       }
     }
+ 
+    "return list of all connected devices" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val socket1 = system.actorOf(WebSocketActor.props(probe1.ref))
+      val socket2 = system.actorOf(WebSocketActor.props(probe2.ref))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe1.expectMsg(ConnectedEvent)
+      probe1.send(socket1, GetDevices)
+      probe1.fishForMessage() {
+        case DevicesEvent(List("probe1", "probe2")) => true
+        case m => false
+      }
+    }
   }
 }

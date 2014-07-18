@@ -15,16 +15,12 @@ import scala.collection.Set
 
 object ChannelActor {
   
-  //type Id = String
-//  case class DeviceInfo(name: String, supportedMessages: [String], supportedEvents: [String])
-
   case class RegisterDevice(deviceName: String)
   case class UnRegisterDevice(deviceName: String)
   case class DeviceEvent(deviceName: String, eventId:String, content:String)
   case class Message(fromDevice: String, targetDevice: String, messageId: String, params: String)
-//  case object GetConnectedDevices  // Returns ConnectedDevices
-//  case class ConnectedDevices(names: [String])
-//  case class GetDevice(deviceName: String)
+  case object GetConnectedDevices 
+  case class ConnectedDevices(names: Seq[String])
   
   case class JoinedChannelEvent(deviceName:String)
   case class LeftChannelEvent(deviceName:String)
@@ -55,6 +51,9 @@ class ChannelActor extends Actor with ActorLogging {
     
     case event @ Message(from, target, messageId, params) =>
       devices.get(target) foreach (_ forward event)
+    
+    case GetConnectedDevices =>
+      sender ! ConnectedDevices(devices.keys.toList)
   }
   
   def receive = broadcaster(Map.empty)
