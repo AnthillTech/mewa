@@ -8,33 +8,49 @@ The API is based on WebSocket communication and consists of JSON structures.
 ## Useful links
 
 * Discussion group
+* Commercial support
 
-## Server API specyfication
-  /** 
-   *  Connect client to the channel  
-   *  JSON format:
-   *  {"message": "connect", "channel":"channel name", "device":"device1", "password":"channel password"}
-   */
-  case class ConnectToChannel(channel: String, device: String, password: String) extends ClientMessage
-  /** 
-   *  Notify client that it was successfully connected to the channel. 
-   *  JSON format: 
-   *  {"message": "connected"}  
-   */
-  case object ConnectedEvent extends ClientMessage
-  
-  /** 
-   *  Disconnect from channel.
-   *  JSON format: 
-   *  {"message": "disconnect"}  
-   */
-  case object DisconnectFromChannel extends ClientMessage
-  /** 
-   *  Notify client that it was disconnected from channel. 
-   *  JSON format: 
-   *  {"message": "disconnected"}  
-   */
-  case object DisconnectedEvent extends ClientMessage
+## Server API specification
+
+Server API offer the following functionality:
+* Connecting to the channel
+* Send message
+* Receive message
+* Send event
+* Receive event
+* Get list of connected to the channel devices
+
+### Connect
+Connect device to the channel. Device can only be connected to one channel at the time. 
+#### JSON format:
+```json
+{ "message": "connect", 
+  "channel":"channel name", 
+  "device":"device1", 
+  "password":"channel password" }
+```
+
+### Connected
+Notify device that it was connected to the channel
+#### JSON format: 
+```json
+{"message": "connected"}  
+```
+
+### Disconnect
+Disconnect device from channel
+#### JSON format
+```json
+{"message": "disconnect"}  
+```
+
+### Connected
+Notify device that it was disconnected from the channel
+#### JSON format: 
+```json
+{"message": "disconnected"}  
+```
+
 
   /** 
    *  Send event to the channel 
