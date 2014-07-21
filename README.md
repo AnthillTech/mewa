@@ -31,25 +31,22 @@ Connect device to the channel. Device can only be connected to one channel at th
 ```
 
 ### Connected
-Notify device that it was connected to the channel
-#### JSON format: 
 ```json
 {"message": "connected"}  
 ```
+Notify device that it was connected to the channel
 
 ### Disconnect
-Disconnect device from channel
-#### JSON format
 ```json
 {"message": "disconnect"}  
 ```
+Disconnect device from channel
 
 ### Connected
-Notify device that it was disconnected from the channel
-#### JSON format: 
 ```json
 {"message": "disconnected"}  
 ```
+Notify device that it was disconnected from the channel
 
 
   /** 
