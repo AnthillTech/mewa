@@ -1,7 +1,7 @@
-# Channel server
+# Mewa server
 
 ## About
-This is server application written in Scala and Play framework. 
+Mewa is server application written in Scala and Play framework. 
 The server creates channels which can be accessed by devices to send and receive messages and events.
 The API is based on WebSocket communication and consists of JSON structures.
 
