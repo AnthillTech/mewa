@@ -41,7 +41,42 @@ object WebSocketActor {
    *  {"message": "disconnected"}  
    */
   case object DisconnectedEvent extends ClientMessage
+  
+  /** 
+   *  Client can be connected only to one channel at the time. 
+   *  JSON format: 
+   *  {"message": "already-connected-error"}  
+   */
+  case object AlreadyConnectedError extends ClientMessage
+  /** 
+   *  Wrong credentials. 
+   *  JSON format: 
+   *  {"message": "authorization-error"}  
+   */
+  case object AuthorizationError extends ClientMessage
+  /** 
+   *  There is no connection to the channel. 
+   *  JSON format: 
+   *  {"message": "not-connected-error"}  
+   */
+  case object NotConnectedError extends ClientMessage
+  
+  /** 
+   *  Device joined channel event
+   *  JSON format: 
+   *  { "message": "joined-channel", "device": "device name"}  
+   */
+  case class DeviceJoinedChannel(device: String) extends ClientMessage
+  
+  /** 
+   *  Device left channel event
+   *  JSON format: 
+   *  { "message": "left-channel", "device": "device name"}  
+   */
+  case class DeviceLeftChannel(device: String) extends ClientMessage
+  
 
+  
   /** 
    *  Send event to the channel 
    *  JSON format: 
@@ -78,26 +113,7 @@ object WebSocketActor {
    *  {"message": "devices-event", "devices":["device1", "device2"]}  
    */
   case class DevicesEvent(names: Seq[String]) extends ClientMessage
-  
-  /** 
-   *  Client can be connected only to one channel at the time. 
-   *  JSON format: 
-   *  {"message": "already-connected-error"}  
-   */
-  case object AlreadyConnectedError extends ClientMessage
-  /** 
-   *  Wrong credentials. 
-   *  JSON format: 
-   *  {"message": "authorization-error"}  
-   */
-  case object AuthorizationError extends ClientMessage
-  /** 
-   *  There is no connection to the channel. 
-   *  JSON format: 
-   *  {"message": "not-connected-error"}  
-   */
-  case object NotConnectedError extends ClientMessage
-  
+
   /**
    * Formats WebSocket frames to be ClientMessages
    */
@@ -119,6 +135,12 @@ object WebSocketActor {
                                             , "device" -> msg.device
                                             , "password" -> msg.password )
       case DisconnectFromChannel => Json.obj("message" -> "disconnect")
+      case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
+      case AuthorizationError => Json.obj("message" -> "authorization-error")
+      case NotConnectedError => Json.obj("message" -> "not-connected-error")
+      case msg:DeviceJoinedChannel => Json.obj("message" -> "joined-channel", "device" -> msg.device)                                                                                                                        
+      case msg:DeviceLeftChannel => Json.obj("message" -> "left-channel", "device" -> msg.device)                                                                                                                        
+
       case msg: SendToChannel => Json.obj( "message" -> "send-to-channel" 
                                          , "event" -> Json.obj("id" -> msg.eventId, "content" -> msg.eventContent) )
       case msg: SendToDevice => Json.obj( "message" -> "send-to-device" 
@@ -138,9 +160,6 @@ object WebSocketActor {
       case msg:DevicesEvent => Json.obj("message" -> "devices-event", "devices" -> msg.names)                                                                                                                        
       
 
-      case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
-      case AuthorizationError => Json.obj("message" -> "authorization-error")
-      case NotConnectedError => Json.obj("message" -> "not-connected-error")
   }
 
   /**
@@ -150,6 +169,11 @@ object WebSocketActor {
     (jsval \ "message").as[String] match {
       case "connect" => connectFromJson(jsval)
       case "disconnect" => JsSuccess(DisconnectFromChannel)
+      case "already-connected-error" => JsSuccess(AlreadyConnectedError)
+      case "authorization-error" => JsSuccess(AuthorizationError)
+      case "not-connected-error" => JsSuccess(NotConnectedError)
+      case "joined-channel" => joinedChannelFromJson(jsval)
+      case "left-channel" => leftChannelFromJson(jsval)
       case "send-to-channel" => sendToChannelFromJson(jsval)
       case "send-to-device" => sendToDeviceFromJson(jsval)
       case "get-devices" => JsSuccess(GetDevices)
@@ -158,9 +182,6 @@ object WebSocketActor {
       case "channel-event" => channelEventFromJson(jsval)
       case "message-event" => messageEventFromJson(jsval)
       case "devices-event" => devicesEventFromJson(jsval)
-      case "already-connected-error" => JsSuccess(AlreadyConnectedError)
-      case "authorization-error" => JsSuccess(AuthorizationError)
-      case "not-connected-error" => JsSuccess(NotConnectedError)
       case other => JsError("Unknown client message: <" + other + ">")
     }
   }
@@ -176,6 +197,16 @@ object WebSocketActor {
     val eventId = (jsval \ "event" \ "id").as[String]
     val eventContent = (jsval \ "event" \ "content").as[String]
     JsSuccess(SendToChannel(eventId, eventContent))
+  }
+
+  def joinedChannelFromJson(jsval:JsValue): JsResult[DeviceJoinedChannel] = { 
+    val deviceName = (jsval \ "device").as[String]
+    JsSuccess(DeviceJoinedChannel(deviceName))
+  }
+
+  def leftChannelFromJson(jsval:JsValue): JsResult[DeviceLeftChannel] = { 
+    val deviceName = (jsval \ "device").as[String]
+    JsSuccess(DeviceLeftChannel(deviceName))
   }
 
   def sendToDeviceFromJson(jsval:JsValue): JsResult[SendToDevice] = { 
@@ -265,10 +296,10 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
       socket ! DevicesEvent(devices)
       
     case ChannelActor.JoinedChannelEvent(deviceName) =>
-      socket ! ChannelEvent(deviceName, "Device joined channel", "")
+      socket ! DeviceJoinedChannel(deviceName)
       
     case ChannelActor.LeftChannelEvent(deviceName) =>
-      socket ! ChannelEvent(deviceName, "Device left channel", "")
+      socket ! DeviceLeftChannel(deviceName)
     
     case DisconnectFromChannel =>
       channel ! ChannelActor.UnRegisterDevice(deviceName)
