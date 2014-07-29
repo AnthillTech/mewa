@@ -5,12 +5,12 @@ import akka.testkit.TestKit
 import akka.testkit.ImplicitSender
 import org.scalatest.{WordSpecLike, Matchers, BeforeAndAfterAll}
 import com.anthill.channels.ChannelManagerActor
-import com.anthill.channels.ChannelActor._
 import akka.util.Timeout
 import akka.testkit.TestProbe
 import scala.concurrent.duration._
 import akka.actor.Identify
 import akka.actor.ActorIdentity
+import com.anthill.channels.ChannelActor
 
 
 /**
@@ -38,7 +38,7 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
  
     "not be connected to the channel" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! SendToChannel("","") 
+      wsActor ! SetDeviceProperty("","","") 
       expectMsg(NotConnectedError)
     }
   }
@@ -72,10 +72,10 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       probe.send(socket1, ConnectToChannel("test1", "dev1", "pass1"))
       probe.expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test1")
-      channel ! RegisterDevice("testDevice")
+      channel ! ChannelActor.RegisterDevice("testDevice")
       probe.send(socket1, DisconnectFromChannel)
       fishForMessage() {
-        case LeftChannelEvent("dev1") => true
+        case ChannelActor.LeftChannelEvent("dev1") => true
         case _ => false
       }
     }
@@ -86,27 +86,73 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       probe.send(socket1, ConnectToChannel("test2", "dev1", "pass1"))
       probe.expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test2")
-      channel ! RegisterDevice("testDevice")
+      channel ! ChannelActor.RegisterDevice("testDevice")
       system.stop(socket1)
       fishForMessage() {
-        case LeftChannelEvent("dev1") => true
+        case ChannelActor.LeftChannelEvent("dev1") => true
         case _ => false
       }
     }
  
-    "send message to other socket" in {
+    "send set property event" in {
       val probe1 = TestProbe()
       val probe2 = TestProbe()
       val socket1 = system.actorOf(WebSocketActor.props(probe1.ref))
       val socket2 = system.actorOf(WebSocketActor.props(probe2.ref))
       probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
       probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
-      probe1.expectMsg(ConnectedEvent)
-      val msg = SendToDevice("probe1", "msg1", "params1")
-      probe1.send(socket1, SendToDevice("probe2", "msg1", "params1"))
+      probe2.expectMsg(ConnectedEvent)
+      probe1.send(socket1, SetDeviceProperty("probe2", "prop1", "12"))
       probe2.fishForMessage() {
-        case MessageEvent("probe1", "msg1", "params1") => true
-        case _ => false
+        case SetPropertyEvent("prop1", "12") => true
+        case m => false
+      }
+    }
+ 
+    "fan out notification about property change" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val socket1 = system.actorOf(WebSocketActor.props(probe1.ref))
+      val socket2 = system.actorOf(WebSocketActor.props(probe2.ref))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe2.expectMsg(ConnectedEvent)
+      probe1.send(socket1, NotifyPropertyChanged("prop1", "12"))
+      probe2.fishForMessage() {
+        case PropertyChangedEvent("probe1", "prop1", "12") => true
+        case m => false
+      }
+    }
+ 
+    "send get property event" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val socket1 = system.actorOf(WebSocketActor.props(probe1.ref))
+      val socket2 = system.actorOf(WebSocketActor.props(probe2.ref))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe2.expectMsg(ConnectedEvent)
+      
+      probe1.send(socket1, GetDeviceProperty("probe2", "prop1"))
+      probe2.fishForMessage() {
+        case GetPropertyEvent("probe1", "prop1") => true
+        case m => false
+      }
+    }
+ 
+    "send property value" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val socket1 = system.actorOf(WebSocketActor.props(probe1.ref))
+      val socket2 = system.actorOf(WebSocketActor.props(probe2.ref))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe2.expectMsg(ConnectedEvent)
+      
+      probe1.send(socket1, SendPropertyValue("probe2", "prop1", "13"))
+      probe2.fishForMessage() {
+        case PropertyValue("probe1", "prop1", "13") => true
+        case m => false
       }
     }
  
@@ -121,7 +167,10 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       probe1.send(socket1, GetDevices)
       probe1.fishForMessage() {
         case DevicesEvent(List("probe1", "probe2")) => true
-        case m => false
+        case DevicesEvent(List("probe2", "probe1")) => true
+        case m =>
+          println(m)
+          false
       }
     }
   }

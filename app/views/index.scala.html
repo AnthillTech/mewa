@@ -6,32 +6,39 @@
 
 	<h1 id="title">Channel tester</h1>
 
-    <div>
-        <span>Channel name:</span>
+    <div class="panel">
+        <span class="panelHeader">Connection:</span>
+        <span >Channel name:</span>
         <input id="channelName" type="text" value="test"/>
         <button id="connectChannel">Connect</button>
     </div> 
-    <div>
-        <span>Event name</span>
-        <input id="eventName" type="text" value="testEvent"/>
-        <span>Event params</span>
-        <input id="eventParams" type="text" value=""/>
-        <button id="sendEvent">Send</button>
+    <div class="panel">
+        <span class="panelHeader">Get property:</span>
+        <span>Device</span>
+        <input id="deviceName1" type="text" value=""/>
+        <span>property</span>
+        <input id="propertyName1" type="text" value="level"/>
+        <button id="getPropertyBtn">Send</button>
     </div>
-    <div>
+    <div class="panel">
+        <span class="panelHeader">Set property:</span>
         <span>Target device</span>
-        <input id="cmdDeviceName" type="text" value="deviceD"/>
-        <span>Command name</span>
-        <input id="cmdName" type="text" value="testCommand"/>
+        <input id="deviceName2" type="text" value=""/>
+        <span>Property name</span>
+        <input id="propertyName2" type="text" value="level"/>
         <span>Event params</span>
-        <input id="cmdParams" type="text" value=""/>
-        <button id="sendCmd">Send</button>
+        <input id="propertyValue2" type="text" value=""/>
+        <button id="setPropertyBtn">Send</button>
     </div>
-    <div>
+    <div class="panel">
+        <span class="panelHeader">Channel info:</span>
         <button id="getDevices">Get connected devices</button>
     </div>
     
-    <div id="chatLog" class="chatLog"></div>
+    <div class="panel">
+      <h4>Event log</h4>
+      <div id="chatLog" class="chatLog"></div>
+    </div>
  
  	<script>
  	
@@ -57,18 +64,31 @@
           message("Error: " + reason);
         }
       
-        connection.onEvent = function(id, content){
-            if(id == "picture"){
-                messageImage(chatLog, content);
-            } else {
-                message("Event received. Name: " + id + " params:" + content);
-            }               
+        connection.onDeviceJoinedChannel = function(deviceName){
+            message("Device " + deviceName + " joined channel.");
         }
         
-        connection.onMessage = function(from, id, params){
-            message("Message received from: " + from + " name: " + id + " params:" + params);
+        connection.onDeviceLeftChannel = function(deviceName){
+            message("Device " + deviceName + " left channel.");
         }
         
+        connection.onSetProperty = function(property, value){
+            message("Set property <b>" + property + "</b> to value: <b>" + value + "</b>");
+        }
+        
+        connection.onPropertyChanged = function(device, property, value){
+            message("Property <b>" + property + "</b> on device <b>" + device + "</b> changed to value: <b>" + value + "</b>");
+        }
+        
+        connection.onGetProperty = function(device, property){
+            message("Device <b>" + device + "</b> asked for property <b>" + property + "</b>.");
+            connection.sendPropertyValue(device, "level", "13");
+        }
+        
+        connection.onPropertyValue = function(device, property, value){
+            message(device + "." + property + " = <b>" + value + "</b>.");
+        }
+
         connection.onDevicesEvent = function(devices){
         	message("Connected devices:");
         	for(var i in devices){
@@ -84,17 +104,19 @@
           $('#chatLog').append(msg+'</p>');
       }
 	 	
-      $('#sendEvent').click(function(){
-    	  var eventName = $("#eventName").val();
-    	  var eventParams = $("#eventParams").val();
-    	  connection.sendToChannel(eventName, eventParams);
+      $("#getPropertyBtn").click(function(event) {
+    	  var device = $("#deviceName1").val();
+    	  var property = $("#propertyName1").val();
+    	  connection.getDeviceProperty(device, property);
       });
-      $('#sendCmd').click(function(){
-    	  var targetDevice = $("#cmdDeviceName").val();
-    	  var command = $("#cmdName").val();
-    	  var params = $("#cmdParams").val();
-          connection.sendToDevice(targetDevice, command, params);
+      
+      $("#setPropertyBtn").click(function(event) {
+          var device = $("#deviceName2").val();
+          var property = $("#propertyName2").val();
+          var value = $("#propertyValue2").val();
+          connection.setDeviceProperty(device, property, value);
       });
+
       $('#getDevices').click(function(){
           connection.getDevices();
       });

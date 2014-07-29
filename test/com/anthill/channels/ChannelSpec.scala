@@ -24,26 +24,6 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
  
   "Channel" should {
  
-    "forward message to registered listeners" in {
-      val probe1 = TestProbe()
-      val probe2 = TestProbe()
-      val channel = system.actorOf(Props[ChannelActor])
-      probe1.send(channel, RegisterDevice("probe1"))
-      probe2.send(channel, RegisterDevice("probe2"))
-      probe1.expectMsgType[JoinedChannelEvent]
-      val msg = DeviceEvent("testDevice2", "test", "my event")
-      probe1.send(channel, msg)
-      probe2.expectMsg(msg)
-    }
- 
-    "not forward message to self" in {
-      val channel = system.actorOf(Props[ChannelActor])
-      val msg = DeviceEvent("testDevice", "test", "my event")
-      channel ! RegisterDevice("testDevice")
-      channel ! msg
-      expectNoMsg
-    }
- 
     "send Join event when new actors adds listener" in {
       val probe1 = TestProbe()
       val probe2 = TestProbe()
@@ -64,14 +44,26 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       probe1.expectMsgType[LeftChannelEvent]
     }
  
-    "forward messages to target device" in {
+    "send message from one device to the target device" in {
       val probe1 = TestProbe()
       val probe2 = TestProbe()
       val channel = system.actorOf(Props[ChannelActor])
       probe1.send(channel, RegisterDevice("probe1"))
       probe2.send(channel, RegisterDevice("probe2"))
       probe1.expectMsgType[JoinedChannelEvent]
-      val msg = Message("probe1", "probe2", "1", "")
+      val msg = SendToDevice("probe1", "probe2", "msg")
+      probe1.send(channel, msg)
+      probe2.expectMsg(msg)
+    }
+ 
+    "fan-out message " in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val channel = system.actorOf(Props[ChannelActor])
+      probe1.send(channel, RegisterDevice("probe1"))
+      probe2.send(channel, RegisterDevice("probe2"))
+      probe1.expectMsgType[JoinedChannelEvent]
+      val msg = Fanout("probe1", "msg")
       probe1.send(channel, msg)
       probe2.expectMsg(msg)
     }

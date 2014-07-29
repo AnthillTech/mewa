@@ -76,31 +76,58 @@ object WebSocketActor {
   case class DeviceLeftChannel(device: String) extends ClientMessage
   
 
+  /** 
+   *  Set property value on given device. Send from client to channel.  
+   *  JSON format: 
+   *  { "message": "set-device-property",  "device": "deviceName", "property": "propertyId", "value":"serialized property value"}
+   */
+  case class SetDeviceProperty(device: String, property: String, value: String) extends ClientMessage
+  /** 
+   *  Set property value. Send from channel to to device
+   *  JSON format: 
+   *  { "message": "set-property",  "property": "propertyId", "value":"serialized property value"}
+   */
+  case class SetPropertyEvent(property: String, value: String) extends ClientMessage
   
   /** 
-   *  Send event to the channel 
+   * Notify other devices that property changed
    *  JSON format: 
-   *  {"message": "send-to-channel", "event":{"id": "eventId", "content":"event content"}}  
+   *  { "message": "notify-property-changed",  "property": "propertyId", "value":"serialized property value"}
    */
-  case class SendToChannel(eventId: String, eventContent: String) extends ClientMessage
+  case class NotifyPropertyChanged(property: String, value: String) extends ClientMessage
   /** 
-   *  Notify client about new event send by other clients to the connected channel 
+   * Receive event about property cahgne in one of the connected devices
    *  JSON format: 
-   *  {"message": "channel-event", "event":{"device": "source", "id": "eventId", "content":"event content"}}
+   *  { "message": "property-changed", "device": "from device", "property": "propertyId", "value":"serialized property value"}
    */
-  case class ChannelEvent(deviceName: String, eventId: String, eventContent: String) extends ClientMessage
+  case class PropertyChangedEvent(device: String, property: String, value: String) extends ClientMessage
+
   /** 
-   *  Send message to specific device 
+   *  Get property value from given device. Send from client to channel.  
    *  JSON format: 
-   *  {"message": "send-to-device", "event":{"device": "deviceName", "id": "messageId", "params":"message parameters"}}
+   *  { "message": "get-device-property", "device": "deviceName", "property": "propertyId"}
    */
-  case class SendToDevice(targetDevice: String, messageId: String, params: String) extends ClientMessage
+  case class GetDeviceProperty(device: String, property: String) extends ClientMessage
   /** 
-   *  Notify client about message send from other device 
+   *  Get property value. Send from channel to to device
    *  JSON format: 
-   *  {"message": "message-event", "event":{"device": "source", "id": "messageId", "params":"message params"}}
+   *  { "message": "get-property", "fromDevice": "asking device", "property": "propertyId"}
    */
-  case class MessageEvent(fromDevice: String, messageId: String, params: String) extends ClientMessage
+  case class GetPropertyEvent(fromDevice: String, property: String) extends ClientMessage
+  /** 
+   *  Passes property value.
+   *  JSON format: 
+   *  { "message": "send-property-value", "toDevice": "device", "property": "propertyId", "value: "value"}
+   */
+  case class SendPropertyValue(toDevice: String, property: String, value: String) extends ClientMessage
+  /** 
+   *  Passes property value.
+   *  JSON format: 
+   *  { "message": "property-value", "device": "property device", "property": "propertyId", "value: "value"}
+   */
+  case class PropertyValue(device: String, property: String, value: String) extends ClientMessage
+  
+  
   /** 
    *  Ask for list of all connect to the channel devices. 
    *  JSON format: 
@@ -138,28 +165,23 @@ object WebSocketActor {
       case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
       case AuthorizationError => Json.obj("message" -> "authorization-error")
       case NotConnectedError => Json.obj("message" -> "not-connected-error")
+      case ConnectedEvent => Json.obj("message" -> "connected")
+      case DisconnectedEvent => Json.obj("message" -> "disconnected")
+
       case msg:DeviceJoinedChannel => Json.obj("message" -> "joined-channel", "device" -> msg.device)                                                                                                                        
       case msg:DeviceLeftChannel => Json.obj("message" -> "left-channel", "device" -> msg.device)                                                                                                                        
 
-      case msg: SendToChannel => Json.obj( "message" -> "send-to-channel" 
-                                         , "event" -> Json.obj("id" -> msg.eventId, "content" -> msg.eventContent) )
-      case msg: SendToDevice => Json.obj( "message" -> "send-to-device" 
-                                        , "event" -> Json.obj("device" -> msg.targetDevice, "id" -> msg.messageId, "params" -> msg.params) )
+      case msg: SetDeviceProperty => Json.obj( "message" -> "set-device-property", "device" -> msg.device, "property" ->msg.property, "value" -> msg.value )
+      case msg: SetPropertyEvent => Json.obj( "message" -> "set-property", "property" ->msg.property, "value" -> msg.value )
+      case msg: NotifyPropertyChanged => Json.obj( "message" -> "notify-property-changed", "property" -> msg.property, "value" -> msg.value )
+      case msg: PropertyChangedEvent => Json.obj( "message" -> "property-changed", "device" -> msg.device, "property" -> msg.property, "value" -> msg.value )
+      case msg: GetDeviceProperty => Json.obj( "message" -> "get-device-property", "device" -> msg.device, "property" -> msg.property)
+      case msg: GetPropertyEvent => Json.obj( "message" -> "get-property", "fromDevice" -> msg.fromDevice, "property" -> msg.property)
+      case msg: SendPropertyValue => Json.obj( "message" -> "send-property-value", "toDevice" -> msg.toDevice, "property" ->msg.property, "value" -> msg.value )
+      case msg: PropertyValue => Json.obj( "message" -> "property-value", "device" -> msg.device, "property" ->msg.property, "value" -> msg.value )
+
       case GetDevices => Json.obj("message" -> "get-devices")
-
-      case ConnectedEvent => Json.obj("message" -> "connected")
-      case DisconnectedEvent => Json.obj("message" -> "disconnected")
-      case msg:ChannelEvent => Json.obj( "message" -> "channel-event"
-                                       , "event" -> Json.obj( "device" -> msg.deviceName
-                                                            , "id" -> msg.eventId
-                                                            , "content" -> msg.eventContent) )
-      case msg:MessageEvent => Json.obj( "message" -> "message-event"
-                                       , "event" -> Json.obj( "device" -> msg.fromDevice
-                                                            , "id" -> msg.messageId
-                                                            , "params" -> msg.params) )
       case msg:DevicesEvent => Json.obj("message" -> "devices-event", "devices" -> msg.names)                                                                                                                        
-      
-
   }
 
   /**
@@ -169,18 +191,22 @@ object WebSocketActor {
     (jsval \ "message").as[String] match {
       case "connect" => connectFromJson(jsval)
       case "disconnect" => JsSuccess(DisconnectFromChannel)
+      case "connected" => JsSuccess(ConnectedEvent)
+      case "disconnected" => JsSuccess(DisconnectedEvent)
       case "already-connected-error" => JsSuccess(AlreadyConnectedError)
       case "authorization-error" => JsSuccess(AuthorizationError)
       case "not-connected-error" => JsSuccess(NotConnectedError)
       case "joined-channel" => joinedChannelFromJson(jsval)
       case "left-channel" => leftChannelFromJson(jsval)
-      case "send-to-channel" => sendToChannelFromJson(jsval)
-      case "send-to-device" => sendToDeviceFromJson(jsval)
+      case "set-device-property" => setDevicePropertyFromJson(jsval)
+      case "set-property" => setPropertyFromJson(jsval)
+      case "notify-property-changed" => notifyPropertyChangedFromJson(jsval)
+      case "property-changed" => propertyChangedFromJson(jsval)
+      case "get-device-property" => getDevicePropertyFromJson(jsval)
+      case "get-property" => getPropertyFromJson(jsval)
+      case "send-property-value" => sendPropertyValueFromJson(jsval)
+      case "property-value" => propertyValueFromJson(jsval)
       case "get-devices" => JsSuccess(GetDevices)
-      case "connected" => JsSuccess(ConnectedEvent)
-      case "disconnected" => JsSuccess(DisconnectedEvent)
-      case "channel-event" => channelEventFromJson(jsval)
-      case "message-event" => messageEventFromJson(jsval)
       case "devices-event" => devicesEventFromJson(jsval)
       case other => JsError("Unknown client message: <" + other + ">")
     }
@@ -193,12 +219,6 @@ object WebSocketActor {
     JsSuccess(ConnectToChannel(channel, device, password))
   }
 
-  def sendToChannelFromJson(jsval:JsValue): JsResult[SendToChannel] = { 
-    val eventId = (jsval \ "event" \ "id").as[String]
-    val eventContent = (jsval \ "event" \ "content").as[String]
-    JsSuccess(SendToChannel(eventId, eventContent))
-  }
-
   def joinedChannelFromJson(jsval:JsValue): JsResult[DeviceJoinedChannel] = { 
     val deviceName = (jsval \ "device").as[String]
     JsSuccess(DeviceJoinedChannel(deviceName))
@@ -209,25 +229,56 @@ object WebSocketActor {
     JsSuccess(DeviceLeftChannel(deviceName))
   }
 
-  def sendToDeviceFromJson(jsval:JsValue): JsResult[SendToDevice] = { 
-    val device = (jsval \ "event" \ "device").as[String]
-    val messageId = (jsval \ "event" \ "id").as[String]
-    val params = (jsval \ "event" \ "params").as[String]
-    JsSuccess(SendToDevice(device, messageId, params))
+  def setDevicePropertyFromJson(jsval:JsValue): JsResult[SetDeviceProperty] = { 
+    val device = (jsval \ "device").as[String]
+    val property = (jsval \ "property").as[String]
+    val value = (jsval \ "value").as[String]
+    JsSuccess(SetDeviceProperty(device, property, value))
   }
 
-  def channelEventFromJson(jsval:JsValue): JsResult[ChannelEvent] = { 
-    val deviceName = (jsval \ "event" \ "device").as[String]
-    val eventId = (jsval \ "event" \ "id").as[String]
-    val eventContent = (jsval \ "event" \ "content").as[String]
-    JsSuccess(ChannelEvent(deviceName, eventId, eventContent))
+  def setPropertyFromJson(jsval:JsValue): JsResult[SetPropertyEvent] = { 
+    val property = (jsval \ "property").as[String]
+    val value = (jsval \ "value").as[String]
+    JsSuccess(SetPropertyEvent(property, value))
   }
 
-  def messageEventFromJson(jsval:JsValue): JsResult[MessageEvent] = { 
-    val deviceName = (jsval \ "event" \ "device").as[String]
-    val msgId = (jsval \ "event" \ "id").as[String]
-    val params = (jsval \ "event" \ "params").as[String]
-    JsSuccess(MessageEvent(deviceName, msgId, params))
+  def notifyPropertyChangedFromJson(jsval:JsValue): JsResult[NotifyPropertyChanged] = { 
+    val property = (jsval \ "property").as[String]
+    val value = (jsval \ "value").as[String]
+    JsSuccess(NotifyPropertyChanged(property, value))
+  }
+
+  def propertyChangedFromJson(jsval:JsValue): JsResult[PropertyChangedEvent] = { 
+    val device = (jsval \ "device").as[String]
+    val property = (jsval \ "property").as[String]
+    val value = (jsval \ "value").as[String]
+    JsSuccess(PropertyChangedEvent(device, property, value))
+  }
+
+  def getDevicePropertyFromJson(jsval:JsValue): JsResult[GetDeviceProperty] = { 
+    val device = (jsval \ "device").as[String]
+    val property = (jsval \ "property").as[String]
+    JsSuccess(GetDeviceProperty(device, property))
+  }
+
+  def getPropertyFromJson(jsval:JsValue): JsResult[GetPropertyEvent] = { 
+    val device = (jsval \ "fromDevice").as[String]
+    val property = (jsval \ "property").as[String]
+    JsSuccess(GetPropertyEvent(device, property))
+  }
+
+  def sendPropertyValueFromJson(jsval:JsValue): JsResult[SendPropertyValue] = { 
+    val device = (jsval \ "toDevice").as[String]
+    val property = (jsval \ "property").as[String]
+    val value = (jsval \ "value").as[String]
+    JsSuccess(SendPropertyValue(device, property, value))
+  }
+
+  def propertyValueFromJson(jsval:JsValue): JsResult[PropertyValue] = { 
+    val device = (jsval \ "device").as[String]
+    val property = (jsval \ "property").as[String]
+    val value = (jsval \ "value").as[String]
+    JsSuccess(PropertyValue(device, property, value))
   }
 
   def devicesEventFromJson(jsval:JsValue): JsResult[DevicesEvent] = { 
@@ -245,18 +296,18 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   import WebSocketActor._
 
   var connectedChannel : Option[ActorRef] = None
-  var deviceName: String = ""
+  var socketName: String = ""
   
   /** Disconnected from channel */
   def disconnected: Actor.Receive = {
     
-    case SendToChannel(eventId, eventContent) =>
+    case SetDeviceProperty(device, property, value) =>
       socket ! NotConnectedError
     
     case ConnectToChannel(channel, device, password) =>
       val manager = context.actorSelection("/user/channel-manager")
       manager ! ChannelManagerActor.GetChannel(channel, device, password)
-      deviceName = device
+      socketName = device
       context.become(connecting())
   }
 
@@ -264,7 +315,7 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   def connecting(): Actor.Receive = {
     
     case ChannelManagerActor.ChannelFound(channel) =>
-      channel ! ChannelActor.RegisterDevice(deviceName)
+      channel ! ChannelActor.RegisterDevice(socketName)
       socket ! ConnectedEvent
       connectedChannel = Some(channel)
       context.become(connected(channel))
@@ -277,18 +328,30 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   /** Process messages while connected to the channel */
   def connected(channel: ActorRef): Actor.Receive = {
     
-    case SendToChannel(eventId, eventContent) =>
-      channel ! ChannelActor.DeviceEvent(deviceName, eventId, eventContent)
+    case SetDeviceProperty(device, property, value) =>
+      channel ! ChannelActor.SendToDevice(socketName, device, SetPropertyEvent(property, value))
       
-    case ChannelActor.DeviceEvent(deviceName, eventId, eventContent) =>
-      socket ! ChannelEvent(deviceName, eventId, eventContent)
+    case ChannelActor.SendToDevice(from, to, msg @ SetPropertyEvent(property, value)) =>
+      socket ! msg
+    
+    case GetDeviceProperty(device, property) =>
+      channel ! ChannelActor.SendToDevice(socketName, device, GetPropertyEvent(socketName, property))
       
-    case msg @ SendToDevice(dest, msgId, params) =>
-      channel ! ChannelActor.Message(deviceName, dest, msgId, params)
+    case ChannelActor.SendToDevice(from, to, msg @ GetPropertyEvent(fromDevice, property)) =>
+      socket ! msg
+    
+    case SendPropertyValue(device, property, value) =>
+      channel ! ChannelActor.SendToDevice(socketName, device, PropertyValue(socketName, property, value))
       
-    case ChannelActor.Message(from, dest, msgId, params) =>
-      socket ! MessageEvent(from, msgId, params)
+    case ChannelActor.SendToDevice(from, to, msg @ PropertyValue(fromDevice, property, value)) =>
+      socket ! msg
+    
+    case msg @ NotifyPropertyChanged(property, value) =>
+      channel ! ChannelActor.Fanout(socketName, msg)
       
+    case ChannelActor.Fanout(from, msg @ NotifyPropertyChanged(property, value)) =>
+      socket ! PropertyChangedEvent(from, property, value)
+            
     case GetDevices =>
       channel ! ChannelActor.GetConnectedDevices
       
@@ -302,7 +365,7 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
       socket ! DeviceLeftChannel(deviceName)
     
     case DisconnectFromChannel =>
-      channel ! ChannelActor.UnRegisterDevice(deviceName)
+      channel ! ChannelActor.UnRegisterDevice(socketName)
       connectedChannel = None
       context.become(disconnected)
   }
@@ -310,6 +373,6 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
   def receive = disconnected
   
   override def postStop = {
-    connectedChannel foreach {_ ! ChannelActor.UnRegisterDevice(deviceName)}
+    connectedChannel foreach {_ ! ChannelActor.UnRegisterDevice(socketName)}
   }
 }

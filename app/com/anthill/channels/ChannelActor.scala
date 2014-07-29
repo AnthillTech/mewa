@@ -17,13 +17,15 @@ object ChannelActor {
   
   case class RegisterDevice(deviceName: String)
   case class UnRegisterDevice(deviceName: String)
-  case class DeviceEvent(deviceName: String, eventId:String, content:String)
-  case class Message(fromDevice: String, targetDevice: String, messageId: String, params: String)
+  case class JoinedChannelEvent(deviceName:String)
+  case class LeftChannelEvent(deviceName:String)
+  
+  case class SendToDevice(fromDevice: String, toDevice: String, message: Any)
+  case class Fanout(fromDevice: String, message: Any)
+  
   case object GetConnectedDevices 
   case class ConnectedDevices(names: Seq[String])
   
-  case class JoinedChannelEvent(deviceName:String)
-  case class LeftChannelEvent(deviceName:String)
 }
 
 
@@ -46,11 +48,11 @@ class ChannelActor extends Actor with ActorLogging {
       devices.filterKeys(_ != name).values foreach (_ ! event)
       context.become(broadcaster(devices - name))
     
-    case event @ DeviceEvent(name, id, content) =>
-      devices.filterKeys(_ != name).values.foreach(_ forward event)
-    
-    case event @ Message(from, target, messageId, params) =>
-      devices.get(target) foreach (_ forward event)
+    case msg @ SendToDevice(fromDevice, toDevice, message) =>
+      devices.get(toDevice) foreach (_ ! SendToDevice(msg.fromDevice, msg.toDevice, msg.message))
+
+    case event @ Fanout(fromDevice, message) =>
+      devices.filterKeys(_ != fromDevice).values.foreach(_ forward event)
     
     case GetConnectedDevices =>
       sender ! ConnectedDevices(devices.keys.toList)

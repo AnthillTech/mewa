@@ -23,7 +23,7 @@ Disconnect device from channel
 ```
 Notify device that it was connected to the channel
 
-### Connected
+### Disconnected
 ```json
 {"message": "disconnected"}
 ```
@@ -64,20 +64,51 @@ Notify all connected device that one of the devices left channel.
 
 ### Write property
 ```json
-{ "message": "write-property", 
+{ "message": "set-device-property", 
   "device": "deviceName", 
   "property": "propertyId", 
   "value":"serialized property value"}
 ```
-Set property on device to given value. No message is returned
+Set property on device to given value. No message is returned. This message is send from device to channel.
+
+```json
+{ "message": "set-property", 
+  "property": "propertyId", 
+  "value":"serialized property value"}
+```
+Set property to given value. No message is returned. This message is send from channel to device with given property.
 
 ### Read property value
 ```json
-{ "message": "read-property", 
+{ "message": "get-device-property", 
   "device": "deviceName", 
   "property": "propertyId"}
 ```
-Read property value from given device. Returns property value
+Read property value from given device. Send from device to channel
+
+```json
+{ "message": "get-property", 
+  "fromDevice": "deviceName", 
+  "property": "propertyId"}
+```
+Read property value from given device. Send from channel to device
+
+### Send property value
+```json
+{ "message": "send-property-value", 
+  "toDevice": "deviceName", 
+  "property": "propertyId",
+  "value": "property value"}
+```
+Send property value to given device. Send from device to channel
+
+```json
+{ "message": "property-value", 
+  "device": "deviceName", 
+  "property": "propertyId",
+  "value": "property value"}
+```
+Send property value to given device. Send from channel to device
 
 ### Property value
 ```json

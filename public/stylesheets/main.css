@@ -26,3 +26,12 @@ body {
     width:50%;
     vertical-align: top;
 }
+
+.panel{
+	padding:10px;
+}
+
+.panelHeader{
+	width: 100em;
+	font-weight: bold;
+}
