@@ -1,4 +1,4 @@
-name := """event-server"""
+name := """mewa"""
 
 version := "0.1"
 
