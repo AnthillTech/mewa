@@ -368,6 +368,7 @@ class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
       channel ! ChannelActor.UnRegisterDevice(socketName)
       connectedChannel = None
       context.become(disconnected)
+      socket ! DisconnectedEvent
   }
   
   def receive = disconnected
