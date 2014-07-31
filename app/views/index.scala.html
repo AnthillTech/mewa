@@ -31,6 +31,9 @@
         <button id="setPropertyBtn">Send</button>
     </div>
     <div class="panel">
+        <div>Change property temperature to 12. <button id="changePropertyBtn1">Change property</button></div>
+    </div>
+    <div class="panel">
         <span class="panelHeader">Channel info:</span>
         <button id="getDevices">Get connected devices</button>
     </div>
@@ -115,6 +118,10 @@
           var property = $("#propertyName2").val();
           var value = $("#propertyValue2").val();
           connection.setDeviceProperty(device, property, value);
+      });
+      
+      $("#changePropertyBtn1").click(function(event) {
+          connection.notifyPropertyChanged("temperature", "12");
       });
 
       $('#getDevices').click(function(){
