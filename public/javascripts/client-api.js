@@ -25,40 +25,27 @@ function channelConnect(url, channelName, deviceName, password){
 		onDeviceJoinedChannel: function(name) {},
 		/** Device left */
 		onDeviceLeftChannel: function(name) {},
-		/** Set device property */
-		setDeviceProperty: function(device, property, value) {
-			msg = {message: "set-device-property", device: device, property: property, value: value}
+		/** send event to all devices */
+		sendEvent: function(eventId, params) {
+			msg = {message: "send-event", id: eventId, params: params}
 	        _connection._sendMsg(msg);
 		},
-		/** Received set property command */
-		onSetProperty: function(property, value) {},
-		/** Notify devices in channel that property changed */
-		notifyPropertyChanged: function(property, value) {
-			msg = {message: "notify-property-changed", property: property, value: value}
+		/** Received event */
+		onEvent: function(device, eventId, params) {},
+		/** send event to all devices */
+		sendMessage: function(device, msgId, params) {
+			msg = {message: "send-message", device: device, id: msgId, params: params}
 	        _connection._sendMsg(msg);
 		},
-		/** Received notiication about property change */
-		onPropertyChanged: function(device, property, value) {},
-		/** Set device property */
-		getDeviceProperty: function(device, property) {
-			msg = {message: "get-device-property", device: device, property: property}
-	        _connection._sendMsg(msg);
-		},
-		/** Received set property command */
-		onGetProperty: function(fromDevice, property) {},
-		/** Send property value to another device*/
-		sendPropertyValue: function(device, property, value) {
-			msg = {message: "send-property-value", toDevice: device, property: property, value: value}
-	        _connection._sendMsg(msg);
-		},
-		/** Received set property command */
-		onPropertyValue: function(fromDevice, property, value) {},
-		
+		/** Received message */
+		onMessage: function(device, messageId, params) {},
 		/** Get list of all connected to the channel devices */
 		getDevices: function() {
 			msg = {message: "get-devices"}
 	        _connection._sendMsg(msg);
 		},
+		/** Received set property command */
+		onDevicesEvent: function(devices) {},
 		_sendMsg: function(msg){
 	        try{
 	            json = JSON.stringify(msg);
@@ -115,17 +102,11 @@ function channelConnect(url, channelName, deviceName, password){
 		else if(event.message == "left-channel"){
 			_connection.onDeviceLeftChannel(event.device);
 		}
-		else if(event.message == "set-property"){
-			_connection.onSetProperty(event.property, event.value);
+		else if(event.message == "event"){
+			_connection.onEvent(event.id, event.params);
 		}
-		else if(event.message == "get-property"){
-			_connection.onGetProperty(event.fromDevice, event.property);
-		}
-		else if(event.message == "property-value"){
-			_connection.onPropertyValue(event.device, event.property, event.value);
-		}
-		else if(event.message == "property-changed"){
-			_connection.onPropertyChanged(event.device, event.property, event.value);
+		else if(event.message == "message"){
+			_connection.onMessage(event.device, event.id, event.params);
 		}
 		else if(event.message == "devices-event"){
 			_connection.onDevicesEvent(event.devices);

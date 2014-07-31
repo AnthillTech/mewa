@@ -13,25 +13,22 @@
         <button id="connectChannel">Connect</button>
     </div> 
     <div class="panel">
-        <span class="panelHeader">Get property:</span>
-        <span>Device</span>
-        <input id="deviceName1" type="text" value=""/>
-        <span>property</span>
-        <input id="propertyName1" type="text" value="level"/>
-        <button id="getPropertyBtn">Send</button>
+        <span class="panelHeader">Send event:</span>
+        <span>eventID</span>
+        <input id="eventName" type="text" value=""/>
+        <span>params</span>
+        <input id="eventParams" type="text" value="level"/>
+        <button id="sendEventBtn">Send</button>
     </div>
     <div class="panel">
-        <span class="panelHeader">Set property:</span>
+        <span class="panelHeader">Send message:</span>
         <span>Target device</span>
         <input id="deviceName2" type="text" value=""/>
-        <span>Property name</span>
-        <input id="propertyName2" type="text" value="level"/>
-        <span>Event params</span>
-        <input id="propertyValue2" type="text" value=""/>
-        <button id="setPropertyBtn">Send</button>
-    </div>
-    <div class="panel">
-        <div>Change property temperature to 12. <button id="changePropertyBtn1">Change property</button></div>
+        <span>Message name</span>
+        <input id="messageName" type="text" value="level"/>
+        <span>Message params</span>
+        <input id="messageParams" type="text" value=""/>
+        <button id="sendMessageBtn">Send</button>
     </div>
     <div class="panel">
         <span class="panelHeader">Channel info:</span>
@@ -71,25 +68,12 @@
             message("Device " + deviceName + " joined channel.");
         }
         
-        connection.onDeviceLeftChannel = function(deviceName){
-            message("Device " + deviceName + " left channel.");
+        connection.onEvent = function(eventId, params){
+            message("Received event <b>" + eventId + "</b> with params: <b>" + params + "</b>");
         }
         
-        connection.onSetProperty = function(property, value){
-            message("Set property <b>" + property + "</b> to value: <b>" + value + "</b>");
-        }
-        
-        connection.onPropertyChanged = function(device, property, value){
-            message("Property <b>" + property + "</b> on device <b>" + device + "</b> changed to value: <b>" + value + "</b>");
-        }
-        
-        connection.onGetProperty = function(device, property){
-            message("Device <b>" + device + "</b> asked for property <b>" + property + "</b>.");
-            connection.sendPropertyValue(device, "level", "13");
-        }
-        
-        connection.onPropertyValue = function(device, property, value){
-            message(device + "." + property + " = <b>" + value + "</b>.");
+        connection.onMessage = function(device, msgId, params){
+            message("Received message <b>" + msgId + "</b> from <b>" + device + "</b> with params: <b>" + params + "</b>");
         }
 
         connection.onDevicesEvent = function(devices){
@@ -107,21 +91,17 @@
           $('#chatLog').append(msg+'</p>');
       }
 	 	
-      $("#getPropertyBtn").click(function(event) {
-    	  var device = $("#deviceName1").val();
-    	  var property = $("#propertyName1").val();
-    	  connection.getDeviceProperty(device, property);
+      $("#sendEventBtn").click(function(event) {
+    	  var eventId = $("#eventName").val();
+    	  var params = $("#eventParams").val();
+    	  connection.sendEvent(eventId, params);
       });
       
-      $("#setPropertyBtn").click(function(event) {
+      $("#sendMessageBtn").click(function(event) {
           var device = $("#deviceName2").val();
-          var property = $("#propertyName2").val();
-          var value = $("#propertyValue2").val();
-          connection.setDeviceProperty(device, property, value);
-      });
-      
-      $("#changePropertyBtn1").click(function(event) {
-          connection.notifyPropertyChanged("temperature", "12");
+          var msgId = $("#messageName").val();
+          var params = $("#messageParams").val();
+          connection.sendMessage(device, msgId, params);
       });
 
       $('#getDevices').click(function(){
