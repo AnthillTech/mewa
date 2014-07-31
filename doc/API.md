@@ -1,6 +1,6 @@
 # API Messages specification
 
-## Connecting Protocol
+## Connecting
 
 ### Connect
 ```json
@@ -60,85 +60,45 @@ Notify all already connected device that new device was connected to the channel
 Notify all connected device that one of the devices left channel.
 
 
-## Attribute protocol
+## Communication
 
-### Write property
+### Send event
 ```json
-{ "message": "set-device-property", 
-  "device": "deviceName", 
-  "property": "propertyId", 
-  "value":"serialized property value"}
+{ "message": "send-event", 
+  "id": "eventId", 
+  "params":"json with params"}
 ```
-Set property on device to given value. No message is returned. This message is send from device to channel.
+Send event to the channel
 
+### Event
 ```json
-{ "message": "set-property", 
-  "property": "propertyId", 
-  "value":"serialized property value"}
+{"message": "event", 
+ "device": "device1", 
+ "id": "eventId", 
+ "params":"json"}
 ```
-Set property to given value. No message is returned. This message is send from channel to device with given property.
+Notify client about new event send by other clients to the connected channel 
 
-### Read property value
+### Send message
 ```json
-{ "message": "get-device-property", 
-  "device": "deviceName", 
-  "property": "propertyId"}
+{"message": "send-message", 
+ "device": "device1", 
+ "id": "messageId", 
+ "params":"message parameters"}
 ```
-Read property value from given device. Send from device to channel
+Send message to specific device 
 
+### Message
 ```json
-{ "message": "get-property", 
-  "fromDevice": "deviceName", 
-  "property": "propertyId"}
+{"message": "message", 
+ "device": "source", 
+ "id": "messageId", 
+ "params":"message params"}
 ```
-Read property value from given device. Send from channel to device
-
-### Send property value
-```json
-{ "message": "send-property-value", 
-  "toDevice": "deviceName", 
-  "property": "propertyId",
-  "value": "property value"}
-```
-Send property value to given device. Send from device to channel
-
-```json
-{ "message": "property-value", 
-  "device": "deviceName", 
-  "property": "propertyId",
-  "value": "property value"}
-```
-Send property value to given device. Send from channel to device
-
-### Property value
-```json
-{ "message": "property-value", 
-  "device": "deviceName", 
-  "property": "propertyId",
-  "value":"serialized property value"}
-```
-Message with property value
-
-### Notify that property on the device was changed
-```json
-{ "message": "notify-property-changed", 
-  "property": "propertyId",
-  "value":"serialized property value"}
-```
-Let channel know that property was changed
-
-### Property changed event
-```json
-{ "message": "property-changed", 
-  "device": "deviceName", 
-  "property": "propertyId",
-  "value":"serialized property value"}
-```
-Send information about property change to the devices.
+Notify client about message send from other device 
 
 
-
-## Discovery protocol
+## Discovery
 
 ### GetDevices
 ```json

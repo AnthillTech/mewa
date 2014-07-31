@@ -236,26 +236,23 @@ class DeviceLeftChannelSpec extends Specification {
 
 
 @RunWith(classOf[JUnitRunner])
-class SetDevicePropertySpec extends Specification {
+class SendEventSpec extends Specification {
 
   import ClientMessageSpec._
 
-  "SetDeviceProperty message" should {
+  "SendEvent message" should {
     
-    val expected = """{ "message": "set-device-property",  
-												"device": "device1", 
-												"property": "property1", 
-												"value":"12"}
+    val expected = """{"message": "send-event", "id": "eventId", "params":"params1"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :ClientMessage = SetDeviceProperty("device1", "property1", "12")
+      val msg :ClientMessage = SendEvent("eventId", "params1")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = SetDeviceProperty("device1", "property1", "12")
+      val msg = SendEvent("eventId", "params1")
       assertFromJson(msg)
     }
   }
@@ -263,25 +260,23 @@ class SetDevicePropertySpec extends Specification {
 
 
 @RunWith(classOf[JUnitRunner])
-class SetPropertySpec extends Specification {
+class EventSpec extends Specification {
 
   import ClientMessageSpec._
 
-  "SetProperty message" should {
+  "Event message" should {
     
-    val expected = """{ "message": "set-property",  
-												"property": "property1", 
-												"value":"12"}
+    val expected = """{"message": "event", "device": "device1", "id": "service.event1", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :ClientMessage = SetPropertyEvent("property1", "12")
+      val msg :ClientMessage = Event("device1", "service.event1", "json")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = SetPropertyEvent("property1", "12")
+      val msg = Event("device1", "service.event1", "json")
       assertFromJson(msg)
     }
   }
@@ -289,25 +284,23 @@ class SetPropertySpec extends Specification {
 
 
 @RunWith(classOf[JUnitRunner])
-class GetDevicePropertySpec extends Specification {
+class SendMessageSpec extends Specification {
 
   import ClientMessageSpec._
 
-  "GetDeviceProperty message" should {
+  "SendMessage message" should {
     
-    val expected = """{ "message": "get-device-property",  
-												"device": "device1", 
-												"property": "property1"}
+    val expected = """{"message": "send-message", "device": "device1", "id": "messageId", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :ClientMessage = GetDeviceProperty("device1", "property1")
+      val msg :ClientMessage = SendMessage("device1", "messageId", "json")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = GetDeviceProperty("device1", "property1")
+      val msg = SendMessage("device1", "messageId", "json")
       assertFromJson(msg)
     }
   }
@@ -315,125 +308,23 @@ class GetDevicePropertySpec extends Specification {
 
 
 @RunWith(classOf[JUnitRunner])
-class GetPropertyEventSpec extends Specification {
+class MessageSpec extends Specification {
 
   import ClientMessageSpec._
 
-  "GetProperty message" should {
+  "Message message" should {
     
-    val expected = """{ "message": "get-property",  "fromDevice": "dev2", "property": "property1"}
+    val expected = """{"message": "message", "device": "source", "id": "messageId", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :ClientMessage = GetPropertyEvent("dev2", "property1")
+      val msg :ClientMessage = Message("source", "messageId", "json")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = GetPropertyEvent("dev2", "property1")
-      assertFromJson(msg)
-    }
-  }
-}
-
-
-@RunWith(classOf[JUnitRunner])
-class SendPropertyValueSpec extends Specification {
-
-  import ClientMessageSpec._
-
-  "SendPropertyValue message" should {
-    
-    val expected = """{ "message": "send-property-value",  
-												"toDevice": "device1", 
-												"property": "property1", 
-												"value":"12"}
-									 """.replaceAll("\\s+", "")
-    
-    "serialize to json" in {
-      val msg :ClientMessage = SendPropertyValue("device1", "property1", "12")
-      val jsvalue = Json.toJson(msg).toString() 
-      jsvalue must beEqualTo(expected)
-    }
-
-    "deserialize from json" in {
-      val msg = SendPropertyValue("device1", "property1", "12")
-      assertFromJson(msg)
-    }
-  }
-}
-
-
-@RunWith(classOf[JUnitRunner])
-class PropertyValueSpec extends Specification {
-
-  import ClientMessageSpec._
-
-  "PropertyValue message" should {
-    
-    val expected = """{ "message": "property-value",  
-												"device": "device1", 
-												"property": "property1", 
-												"value":"12"}
-									 """.replaceAll("\\s+", "")
-    
-    "serialize to json" in {
-      val msg :ClientMessage = PropertyValue("device1", "property1", "12")
-      val jsvalue = Json.toJson(msg).toString() 
-      jsvalue must beEqualTo(expected)
-    }
-
-    "deserialize from json" in {
-      val msg = PropertyValue("device1", "property1", "12")
-      assertFromJson(msg)
-    }
-  }
-}
-
-
-@RunWith(classOf[JUnitRunner])
-class NotifyPropertyChangedSpec extends Specification {
-
-  import ClientMessageSpec._
-
-  "NotifyPropertyChanged message" should {
-    
-    val expected = """{ "message": "notify-property-changed", "property": "prop1", "value":"12"}
-									 """.replaceAll("\\s+", "")
-    
-    "serialize to json" in {
-      val msg :ClientMessage = NotifyPropertyChanged("prop1", "12")
-      val jsvalue = Json.toJson(msg).toString() 
-      jsvalue must beEqualTo(expected)
-    }
-
-    "deserialize from json" in {
-      val msg = NotifyPropertyChanged("prop1", "12")
-      assertFromJson(msg)
-    }
-  }
-}
-
-
-@RunWith(classOf[JUnitRunner])
-class PropertyChangedEventSpec extends Specification {
-
-  import ClientMessageSpec._
-
-  "SetProperty message" should {
-    
-    val expected = """{ "message": "property-changed", "device": "dev1", "property": "prop1", "value":"12"}
-									 """.replaceAll("\\s+", "")
-    
-    "serialize to json" in {
-      val msg :ClientMessage = PropertyChangedEvent("dev1", "prop1", "12")
-      val jsvalue = Json.toJson(msg).toString() 
-      jsvalue must beEqualTo(expected)
-    }
-
-    "deserialize from json" in {
-      val msg = PropertyChangedEvent("dev1", "prop1", "12")
+      val msg = Message("source", "messageId", "json")
       assertFromJson(msg)
     }
   }
