@@ -103,7 +103,7 @@ function channelConnect(url, channelName, deviceName, password){
 			_connection.onDeviceLeftChannel(event.device);
 		}
 		else if(event.message == "event"){
-			_connection.onEvent(event.id, event.params);
+			_connection.onEvent(event.device, event.id, event.params);
 		}
 		else if(event.message == "message"){
 			_connection.onMessage(event.device, event.id, event.params);
