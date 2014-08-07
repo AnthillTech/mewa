@@ -151,7 +151,7 @@ Message used by the device to notify all other devices connected to the channel 
 
 ### Event
 Message received by the device when another device sends out an event notification using **send-event** message  
-**from:** a device
+**from:** a device  
 **to:**   all devices  
 
 ```json
@@ -211,9 +211,9 @@ Message used by the device to find out about the names of all other devices conn
 
 
 ### Device discovery event
-Event recived by the device, containing the list of names of all other devices connected to the channel. Sent by the channel in response to the **get-devices** message
-**from:** the channel
-**to: ** the device
+Event recived by the device, containing the list of names of all other devices connected to the channel. Sent by the channel in response to the **get-devices** message  
+**from:** the channel  
+**to: ** the device  
 
 ```json
 { "message": "devices-event", 
