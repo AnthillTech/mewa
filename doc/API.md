@@ -48,13 +48,13 @@ Connects a device to the channel
 ```
 
 ```
-<fq_channel_name> - fully qualified channel name
-<dev_name> - device name (must be unique within the channel)
-<ch_pwd> - channel access password
+fq_channel_name - fully qualified channel name
+dev_name - device name (must be unique within the channel)
+ch_pwd - channel access password
 ```
 
-If the device successfully connected to the channel it will receive `connected` message. Other devices will receive `joined-channel` message from the channel announcing the arrival of a new device.
-Alternatively the device may receive one of the following error messages: `already-connected-error`, `authorization-error`, `not-connected-error`
+If the device successfully connected to the channel it will receive `connected` message. Other devices will receive `joined-channel` event from the channel announcing the arrival of a new device.
+Alternatively the device may receive one of the following error messages: `already-connected-error`, `authorization-error`
 
 
 ### Disconnect
@@ -67,43 +67,68 @@ Disonnects a device from the channel
 {"message": "disconnect"}
 
 ```
-If the device successfully disconnected from the channel it will receive `disconnected` message. Other devices will receive `left-channel` message from the channel announcing the diconnection of a device from the channel
+If the device successfully disconnected from the channel it will receive `disconnected` message. Other devices will receive `left-channel` event from the channel announcing the diconnection of a device
 
 ### Connected
+Confirms that the device has successfully connected to the channel
+**from:** the channel
+**to:**   the device 
+
 ```json
 {"message": "connected"}
 ```
-Notify device that it was connected to the channel
+
 
 ### Disconnected
+Confirms that the device has successfully disconnected from the channel
+**from:** the channel
+**to:**   the device 
 ```json
 {"message": "disconnected"}
 ```
-Notify device that it was disconnected from the channel
 
 ### Already connected error
+Indicates connection failure due to existing connection from the device to another channel. A device can only be connected to one channel at a time. 
+**from:** the channel
+**to:**   the device 
 ```json
 {"message": "already-connected-error"}
 ```
-Device can be connected only to one channel at the time. 
+
 
 ### Authorization error
+Indicates connection failure due to wrong credentials 
+**from:** the channel
+**to:**   the device 
 ```json
 {"message": "authorization-error"}
 ```
-Wrong credentials. 
+
 
 ### Not connected error
+Indicates message sending failure because the device is not connected to the channel 
+**from:** the channel
+**to:**   the device 
 ```json
 {"message": "not-connected-error"}
 ```
-Device is not connected to the channel. 
 
 ### Device joined channel event
+Notifies all connected devices of the connection of a new device to the channel
+**from:** the channel
+**to:**   the device 
 ```json
-{ "message": "joined-channel", "device": "device name"}
+{ "message": "joined-channel", "device": <device_name>}
 ```
-Notify all already connected device that new device was connected to the channel.
+```
+device_name - name of the device who joined the channel
+```
+
+
+
+
+
+
 
 ### Device left channel event
 ```json
