@@ -53,13 +53,21 @@ Connects a device to the channel
 <ch_pwd> - channel access password
 ```
 
+If the device successfully connected to the channel it will receive `connected` message. Other devices will receive `joined-channel` message from the channel announcing the arrival of a new device.
+Alternatively the device may receive one of the following error messages: `already-connected-error`, `authorization-error`, `not-connected-error`
 
 
 ### Disconnect
+
+Disonnects a device from the channel  
+**from:** any device wishing to disconnect from the channel  
+**to:**   the channel  
+
 ```json
 {"message": "disconnect"}
+
 ```
-Disconnect device from channel
+If the device successfully disconnected from the channel it will receive `disconnected` message. Other devices will receive `left-channel` message from the channel announcing the diconnection of a device from the channel
 
 ### Connected
 ```json
