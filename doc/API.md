@@ -119,7 +119,7 @@ Notifies all connected devices of the connection of a new device to the channel
 ```json
 { "message": "joined-channel", "device": <device_name>}
 ```
-`device_name` - name of the device who joined the channel
+`device_name` - name of the device who has joined the channel
 
 
 ### Device left channel event
@@ -130,18 +130,25 @@ Notifies all connected devices of the disconnection of another device from the c
 ```json
 { "message": "left-channel", "device": <device name>}
 ```
-`device_name` - name of the device who left the channel
-
+`device_name` - name of the device who has left the channel
 
 
 ## Communication
 
 ### Send event
+Message used by the device to notify all other devices connected to the channel about an event  
+**from:** the device  
+**to:**   all devices  
+
 ```json
 { "message": "send-event", 
-  "id": "eventId", 
-  "params":"json with params"}
+  "id": <event_id>, 
+  "params":<json_params>}
 ```
+`event_id` - fully qualified event identifier *see service reference for definitions*
+`json_params` - parameters of the event, expressed in JSON format
+
+
 Send event to the channel
 
 ### Event
