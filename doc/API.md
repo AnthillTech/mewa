@@ -71,8 +71,8 @@ If the device successfully disconnected from the channel it will receive `discon
 
 ### Connected
 Confirms that the device has successfully connected to the channel
-**from:** the channel
-**to:**   the device 
+**from:** the channel  
+**to:**   the device  
 
 ```json
 {"message": "connected"}
@@ -81,16 +81,16 @@ Confirms that the device has successfully connected to the channel
 
 ### Disconnected
 Confirms that the device has successfully disconnected from the channel
-**from:** the channel
-**to:**   the device 
+**from:** the channel  
+**to:**   the device  
 ```json
 {"message": "disconnected"}
 ```
 
 ### Already connected error
 Indicates connection failure due to existing connection from the device to another channel. A device can only be connected to one channel at a time. 
-**from:** the channel
-**to:**   the device 
+**from:** the channel  
+**to:**   the device  
 ```json
 {"message": "already-connected-error"}
 ```
@@ -98,8 +98,8 @@ Indicates connection failure due to existing connection from the device to anoth
 
 ### Authorization error
 Indicates connection failure due to wrong credentials 
-**from:** the channel
-**to:**   the device 
+**from:** the channel  
+**to:**   the device  
 ```json
 {"message": "authorization-error"}
 ```
@@ -107,28 +107,22 @@ Indicates connection failure due to wrong credentials
 
 ### Not connected error
 Indicates message sending failure because the device is not connected to the channel 
-**from:** the channel
-**to:**   the device 
+**from:** the channel  
+**to:**   the device  
 ```json
 {"message": "not-connected-error"}
 ```
 
 ### Device joined channel event
 Notifies all connected devices of the connection of a new device to the channel
-**from:** the channel
-**to:**   the device 
+**from:** the channel  
+**to:**   the device  
 ```json
 { "message": "joined-channel", "device": <device_name>}
 ```
 ```
 device_name - name of the device who joined the channel
 ```
-
-
-
-
-
-
 
 ### Device left channel event
 ```json
