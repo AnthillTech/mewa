@@ -151,7 +151,7 @@ Message used by the device to notify all other devices connected to the channel 
 
 ### Event
 Message received by the device when another device sends out an event notification using **send-event** message  
-**from:** the channel  
+**from:** a device
 **to:**   all devices  
 
 ```json
@@ -166,37 +166,61 @@ Message received by the device when another device sends out an event notificati
 
 
 ### Send message
+Message used by the device to send a message (e.g. a service request) to another device connected to the channel  
+**from:** the device  
+**to:**   another device  
+
 ```json
 {"message": "send-message", 
- "device": "device1", 
- "id": "messageId", 
- "params":"message parameters"}
+ "device": <to_device>, 
+ "id": <message_id>,  
+ "params": <json_params>}
 ```
-Send message to specific device 
+`to_device` - the name of the device to which the message is directed  
+`message_id` - fully qualified message identifier *see service reference for definitions*  
+`json_params` - parameters of the message, expressed in JSON format  
+
 
 ### Message
+Message received by the device when another device sends a message addressed to it using **send-message** message  
+**from:** another device  
+**to:**   the device  
+
 ```json
 {"message": "message", 
- "device": "source", 
- "id": "messageId", 
- "params":"message params"}
+ "device": <from_device>, 
+ "id": <message_id>, 
+ "params": <json_params>}
 ```
-Notify client about message send from other device 
+`from_device` - the name of the device who has sent the message to this device  
+`message_id` - fully qualified message identifier *see service reference for definitions*  
+`json_params` - parameters of the message, expressed in JSON format  
 
 
-## Discovery
+
+## Device Discovery
 
 ### GetDevices
+Message used by the device to find out about the names of all other devices connected to the channel  
+**from:** the device  
+**to:** the channel  
+
 ```json
 {"message": "get-devices"}
 ```
-Ask for list of all connect to the channel devices. 
 
-### Device list
+
+### Device discovery event
+Event recived by the device, containing the list of names of all other devices connected to the channel. Sent by the channel in response to the **get-devices** message
+**from:** the channel
+**to: ** the device
+
 ```json
 { "message": "devices-event", 
-  "devices":["device1", "device2"]}
+  "devices": <device_name_list>}
 ```
-Event with list of all connected devices 
+`device_name_list` - list of device names expressed as JSON list (i.e. [dev_1, dev_2, dev_3....]
+
+
 
 
