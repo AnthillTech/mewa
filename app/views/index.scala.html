@@ -10,6 +10,8 @@
         <span class="panelHeader">Connection:</span>
         <span >Channel name:</span>
         <input id="channelName" type="text" value="test"/>
+        <span >Password:</span>
+        <input id="channelPass" type="text" value="test"/>
         <button id="connectChannel">Connect</button>
     </div> 
     <div class="panel">
@@ -49,7 +51,8 @@
 
     $('#connectChannel').click(function(){
     	var channelName = $("#channelName").val()
-    	connection = createConnection(channelName, deviceName, "pass");
+    	var password = $("#channelPass").val()
+    	connection = createConnection(channelName, deviceName, password);
     });
 
     function createConnection(channelName, device, pass){

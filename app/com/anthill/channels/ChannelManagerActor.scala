@@ -1,6 +1,8 @@
 package com.anthill.channels
 
 import akka.actor.{Actor, ActorRef, Props, ActorLogging}
+import dispatch._, Defaults._
+import play.api.Play
 
 
 
@@ -29,19 +31,30 @@ class ChannelManagerActor extends Actor with ActorLogging{
   def receive = {
     
     case GetChannel(channel, device, password) => 
-      if (canAccess(channel, device, password)){
-        sender() ! ChannelFound(getOrCreateUserActor(channel))
+      processGetChannel(sender, channel, device, password)
+  }
+
+  val apiAuthtUrl = Play.current.configuration.getString("auth.url").getOrElse("")
+
+  def processGetChannel(sender: ActorRef, channel: String, device: String, password: String): Unit = {
+    if(apiAuthtUrl.length > 0){
+      val authRequest = url(apiAuthtUrl).POST
+                          .addParameter("channel", channel)
+                          .addParameter("password", password)
+      for (response <- Http(authRequest OK as.String)){
+        if(response == "ok")                    
+          sender ! ChannelFound(getOrCreateChannel(channel))
+        else
+          sender ! AuthorizationError
       }
-      else sender() ! AuthorizationError
+    }
+    else{
+      sender ! ChannelFound(getOrCreateChannel(channel))
+    }
   }
   
-  /** Check if given credentials give access to the channel */
-  def canAccess(channel: String, device: String, password: String): Boolean = {
-    channel.length > 0 && device.length > 0 && password.length > 0
-  } 
-  
   /** Find or create channel actor */
-  def getOrCreateUserActor(channelName: String): ActorRef = {
+  def getOrCreateChannel(channelName: String): ActorRef = {
     context.child(channelName) match {
       case Some(child) => child
       case None => context.actorOf(Props(classOf[ChannelActor]), channelName)

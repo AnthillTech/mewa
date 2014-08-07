@@ -1,6 +1,6 @@
 name := """mewa"""
 
-version := "0.2"
+version := "0.3"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   anorm,
   cache,
   ws,
+  "net.databinder.dispatch" %% "dispatch-core" % "0.11.1",
   "org.scalatest" % "scalatest_2.11" % "2.2.0" % "test",
   "com.typesafe.akka" %% "akka-testkit" % "2.3.3" % "test", 
   "org.scalacheck" %% "scalacheck" % "1.11.4" % "test"
