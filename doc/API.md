@@ -43,12 +43,12 @@ Connects a device to the channel
   "channel" : <fq_channel_name>, 
   "device"  : <dev_name>, 
   "password": <ch_pwd> }
-  
+```
+```
 <fq_channel_name> - fully qualified channel name
 <dev_name> - device name (must be unique within the channel)
 <ch_pwd> - channel access password
 
-  
 ```
 
 
