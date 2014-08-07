@@ -9,19 +9,18 @@ The idea of the communication channel is central to the followit24.com service. 
 * Access to each channel is protected by a password set by the user who creates and manages the channel
 
 ```
-Example of a fully qualified channel name:
+Example of a fully qualified channel name: 
 
 john_smith.my_home_devices
-
 ```
+
 * Every device that connects to a channel must have a name which is unique within the scope of the channel
 * Devices are identified globally by the account name, the channel name and the device name. The triplet is called fully qualified device name
 
 ```
-Example of a fully qualified device name:
+Example of a fully qualified device name: 
 
 john_smith.my_home_devices.hallway_switch
-
 ```
 
 
@@ -36,9 +35,10 @@ Note that the channel API only defines how information is exchanged between devi
 
 ### Connect
 
-Connects a device to the channel
-from: any device wishing to connect to the channel
-to: the channel
+Connects a device to the channel  
+**from:** any device wishing to connect to the channel  
+**to:**   the channel  
+
 
 ```json
 { "message" : "connect", 
@@ -46,11 +46,11 @@ to: the channel
   "device"  : <dev_name>, 
   "password": <ch_pwd> }
 ```
+
 ```
 <fq_channel_name> - fully qualified channel name
 <dev_name> - device name (must be unique within the channel)
 <ch_pwd> - channel access password
-
 ```
 
 
