@@ -48,9 +48,8 @@ Connects a device to the channel
   "password": <ch_pwd> }
 ```
 
-
-`fq_channel_name` - fully qualified channel name
-`dev_name` - device name (must be unique within the channel)
+`fq_channel_name` - fully qualified channel name  
+`dev_name` - device name (must be unique within the channel)  
 `ch_pwd` - channel access password
 
 
@@ -118,7 +117,8 @@ Notifies all connected devices of the connection of a new device to the channel
 **from:** the channel  
 **to:**   the device  
 ```json
-{ "message": "joined-channel", "device": <device_name>}
+{ "message": "joined-channel", 
+"device": <device_name>}
 ```
 `device_name` - name of the device who has joined the channel
 
@@ -129,7 +129,8 @@ Notifies all connected devices of the disconnection of another device from the c
 **to:**   the device  
 
 ```json
-{ "message": "left-channel", "device": <device name>}
+{ "message": "left-channel", 
+"device": <device name>}
 ```
 `device_name` - name of the device who has left the channel
 
@@ -143,10 +144,10 @@ Message used by the device to notify all other devices connected to the channel 
 
 ```json
 { "message": "send-event", 
-  "id": <event_id>, 
+  "id": <fq_event_id>, 
   "params":<json_params>}
 ```
-`event_id` - fully qualified event identifier *see service reference for definitions*  
+`fq_event_id` - fully qualified event identifier *see service reference for definitions*  
 `json_params` - parameters of the event, expressed in JSON format  
 
 
@@ -158,11 +159,11 @@ Message received by the device when another device sends out an event notificati
 ```json
 {"message": "event", 
  "device": <from_device>, 
- "id":  <event_id>, 
+ "id":  <fq_event_id>, 
  "params":<json_params>}
 ```
 `from_device` - the name of the device that has sent the event message  
-`event_id` - fully qualified event identifier *see service reference for definitions*  
+`fq_event_id` - fully qualified event identifier *see service reference for definitions*  
 `json_params` - parameters of the event, expressed in JSON format  
 
 
@@ -174,11 +175,11 @@ Message used by the device to send a message (e.g. a service request) to another
 ```json
 {"message": "send-message", 
  "device": <to_device>, 
- "id": <message_id>,  
+ "id": <fq_message_id>,  
  "params": <json_params>}
 ```
 `to_device` - the name of the device to which the message is directed  
-`message_id` - fully qualified message identifier *see service reference for definitions*  
+`fq_message_id` - fully qualified message identifier *see service reference for definitions*  
 `json_params` - parameters of the message, expressed in JSON format  
 
 
@@ -190,11 +191,11 @@ Message received by the device when another device sends a message addressed to 
 ```json
 {"message": "message", 
  "device": <from_device>, 
- "id": <message_id>, 
+ "id": <fq_message_id>, 
  "params": <json_params>}
 ```
 `from_device` - the name of the device who has sent the message to this device  
-`message_id` - fully qualified message identifier *see service reference for definitions*  
+`fq_message_id` - fully qualified message identifier *see service reference for definitions*  
 `json_params` - parameters of the message, expressed in JSON format  
 
 
