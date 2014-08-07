@@ -1,4 +1,0 @@
-#!/bin/bash
-
-./activator clean universal:package-zip-tarball
-gsutil cp target/universal/mewa-*.tgz gs://fi24/stable
