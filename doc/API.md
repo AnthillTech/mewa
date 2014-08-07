@@ -37,6 +37,8 @@ Note that the channel API only defines how information is exchanged between devi
 ### Connect
 
 Connects a device to the channel
+from: any device wishing to connect to the channel
+to: the channel
 
 ```json
 { "message" : "connect", 
