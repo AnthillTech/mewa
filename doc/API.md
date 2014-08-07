@@ -1,4 +1,26 @@
-# API Messages specification
+# Channel API Messages specification
+
+The idea of the communication channel is central to the followit24.com service. A few simple rules apply:
+
+* Every device that wants to exchange information using followit24.com must connect to a channel
+* Channels are created by users who have accounts with followit24.com. One user account can create and manage multiple channels. 
+* Every channel must be given a name when it is created. The name must be unique within the scope of the user account
+* Channels are identified globally by the account name and the channel name. The pair is called fully qualified channel name
+* Access to each channel is protected by a password set by the user who creates and manages the channel
+* Every device that connects to a channel must have a name which is unique within the scope of the channel
+
+```Example
+Example of a fully qualified channel name:
+
+john_smith.my_home_devices
+
+```
+
+Devices connect to channels using websocket protocol. All messages passed between the device and the channel are in JSON format. Below you will find the complete reference of all the messages that constitute the channel API
+
+Note that the channel API only defines how information is exchanged between devices and the channel but it does not specify the actual information that devices may want to sent to each other. In other words - the channel provides efficient mechanism for data exchange, but the meaning of the data exchanged is defined on a higher level - the level of services exposed by the devices to each-other. Those services are specified in a separate reference document.
+
+
 
 ## Connecting
 
