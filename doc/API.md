@@ -213,7 +213,7 @@ Message used by the device to find out about the names of all other devices conn
 ### Device discovery event
 Event recived by the device, containing the list of names of all other devices connected to the channel. Sent by the channel in response to the **get-devices** message  
 **from:** the channel  
-**to: ** the device  
+**to:** the device  
 
 ```json
 { "message": "devices-event", 
