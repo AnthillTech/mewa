@@ -70,7 +70,7 @@ Disonnects a device from the channel
 If the device successfully disconnected from the channel it will receive `disconnected` message. Other devices will receive `left-channel` event from the channel announcing the diconnection of a device
 
 ### Connected
-Confirms that the device has successfully connected to the channel
+Confirms that the device has successfully connected to the channel  
 **from:** the channel  
 **to:**   the device  
 
@@ -78,9 +78,8 @@ Confirms that the device has successfully connected to the channel
 {"message": "connected"}
 ```
 
-
 ### Disconnected
-Confirms that the device has successfully disconnected from the channel
+Confirms that the device has successfully disconnected from the channel  
 **from:** the channel  
 **to:**   the device  
 ```json
@@ -88,7 +87,7 @@ Confirms that the device has successfully disconnected from the channel
 ```
 
 ### Already connected error
-Indicates connection failure due to existing connection from the device to another channel. A device can only be connected to one channel at a time. 
+Indicates connection failure due to existing connection from the device to another channel. A device can only be connected to one channel at a time.  
 **from:** the channel  
 **to:**   the device  
 ```json
@@ -97,7 +96,7 @@ Indicates connection failure due to existing connection from the device to anoth
 
 
 ### Authorization error
-Indicates connection failure due to wrong credentials 
+Indicates connection failure due to wrong credentials  
 **from:** the channel  
 **to:**   the device  
 ```json
@@ -106,7 +105,7 @@ Indicates connection failure due to wrong credentials
 
 
 ### Not connected error
-Indicates message sending failure because the device is not connected to the channel 
+Indicates message sending failure because the device is not connected to the channel  
 **from:** the channel  
 **to:**   the device  
 ```json
@@ -114,21 +113,25 @@ Indicates message sending failure because the device is not connected to the cha
 ```
 
 ### Device joined channel event
-Notifies all connected devices of the connection of a new device to the channel
+Notifies all connected devices of the connection of a new device to the channel  
 **from:** the channel  
 **to:**   the device  
 ```json
 { "message": "joined-channel", "device": <device_name>}
 ```
-```
-device_name - name of the device who joined the channel
-```
+`device_name` - name of the device who joined the channel
+
 
 ### Device left channel event
+Notifies all connected devices of the disconnection of another device from the channel  
+**from:** the channel  
+**to:**   the device  
+
 ```json
-{ "message": "left-channel", "device": "device name"}
+{ "message": "left-channel", "device": <device name>}
 ```
-Notify all connected device that one of the devices left channel.
+`device_name` - name of the device who left the channel
+
 
 
 ## Communication
