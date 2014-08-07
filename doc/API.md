@@ -1,4 +1,5 @@
 # Channel API Messages specification
+*rev 0.2*
 
 The idea of the communication channel is central to the followit24.com service. A few simple rules apply:
 
@@ -47,11 +48,11 @@ Connects a device to the channel
   "password": <ch_pwd> }
 ```
 
-```
-fq_channel_name - fully qualified channel name
-dev_name - device name (must be unique within the channel)
-ch_pwd - channel access password
-```
+
+`fq_channel_name` - fully qualified channel name
+`dev_name` - device name (must be unique within the channel)
+`ch_pwd` - channel access password
+
 
 If the device successfully connected to the channel it will receive `connected` message. Other devices will receive `joined-channel` event from the channel announcing the arrival of a new device.
 Alternatively the device may receive one of the following error messages: `already-connected-error`, `authorization-error`
