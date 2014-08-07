@@ -145,20 +145,25 @@ Message used by the device to notify all other devices connected to the channel 
   "id": <event_id>, 
   "params":<json_params>}
 ```
-`event_id` - fully qualified event identifier *see service reference for definitions*
-`json_params` - parameters of the event, expressed in JSON format
+`event_id` - fully qualified event identifier *see service reference for definitions* 
+`json_params` - parameters of the event, expressed in JSON format  
 
-
-Send event to the channel
 
 ### Event
+Message received by the device when another device sends out an event notification using **send-event** message  
+**from:** the channel  
+**to:**   all devices  
+
 ```json
 {"message": "event", 
- "device": "device1", 
- "id": "eventId", 
- "params":"json"}
+ "device": <from_device>, 
+ "id":  <event_id>, 
+ "params":<json_params>}
 ```
-Notify client about new event send by other clients to the connected channel 
+`from_device` - the name of the device that has sent the event message  
+`event_id` - fully qualified event identifier *see service reference for definitions* 
+`json_params` - parameters of the event, expressed in JSON format  
+
 
 ### Send message
 ```json
