@@ -7,14 +7,24 @@ The idea of the communication channel is central to the followit24.com service. 
 * Every channel must be given a name when it is created. The name must be unique within the scope of the user account
 * Channels are identified globally by the account name and the channel name. The pair is called fully qualified channel name
 * Access to each channel is protected by a password set by the user who creates and manages the channel
-* Every device that connects to a channel must have a name which is unique within the scope of the channel
 
-```Example
+```
 Example of a fully qualified channel name:
 
 john_smith.my_home_devices
 
 ```
+* Every device that connects to a channel must have a name which is unique within the scope of the channel
+* Devices are identified globally by the account name, the channel name and the device name. The triplet is called fully qualified device name
+
+```
+Example of a fully qualified device name:
+
+john_smith.my_home_devices.hallway_switch
+
+```
+
+
 
 Devices connect to channels using websocket protocol. All messages passed between the device and the channel are in JSON format. Below you will find the complete reference of all the messages that constitute the channel API
 
@@ -22,16 +32,26 @@ Note that the channel API only defines how information is exchanged between devi
 
 
 
-## Connecting
+## Connecting to channel
 
 ### Connect
+
+Connects a device to the channel
+
 ```json
-{ "message": "connect", 
-  "channel":"channel name", 
-  "device":"device1", 
-  "password":"channel password" }
+{ "message" : "connect", 
+  "channel" : <fq_channel_name>, 
+  "device"  : <dev_name>, 
+  "password": <ch_pwd> }
+  
+<fq_channel_name> - fully qualified channel name
+<dev_name> - device name (must be unique within the channel)
+<ch_pwd> - channel access password
+
+  
 ```
-Connect device to the channel. Device can only be connected to one channel at the time. 
+
+
 
 ### Disconnect
 ```json
