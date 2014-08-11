@@ -1,5 +1,5 @@
 # Channel API Messages specification
-*rev 0.2*
+*document rev 0.2*
 
 The idea of the communication channel is central to the followit24.com service. A few simple rules apply:
 
@@ -48,9 +48,9 @@ Connects a device to the channel
   "password": <ch_pwd> }
 ```
 
-`fq_channel_name` - fully qualified channel name  
-`dev_name` - device name (must be unique within the channel)  
-`ch_pwd` - channel access password
+`fq_channel_name ::= string` - fully qualified channel name  
+`dev_name ::= string` - device name (must be unique within the channel)  
+`ch_pwd ::= string` - channel access password
 
 
 If the device successfully connected to the channel it will receive `connected` message. Other devices will receive `joined-channel` event from the channel announcing the arrival of a new device.
@@ -145,10 +145,10 @@ Message used by the device to notify all other devices connected to the channel 
 ```json
 { "message": "send-event", 
   "id": <fq_event_id>, 
-  "params":<json_params>}
+  "params":<params>}
 ```
-`fq_event_id` - fully qualified event identifier *see service reference for definitions*  
-`json_params` - parameters of the event, expressed in JSON format  
+`fq_event_id ::= string` - fully qualified event identifier *see service reference for definitions*  
+`params ::= string` - parameters of the event 
 
 
 ### Event
@@ -160,11 +160,11 @@ Message received by the device when another device sends out an event notificati
 {"message": "event", 
  "device": <from_device>, 
  "id":  <fq_event_id>, 
- "params":<json_params>}
+ "params":<params>}
 ```
-`from_device` - the name of the device that has sent the event message  
-`fq_event_id` - fully qualified event identifier *see service reference for definitions*  
-`json_params` - parameters of the event, expressed in JSON format  
+`from_device ::= string` - the name of the device that has sent the event message  
+`fq_event_id ::= string` - fully qualified event identifier *see service reference for definitions*  
+`params ::= string` - parameters of the event 
 
 
 ### Send message
@@ -176,11 +176,11 @@ Message used by the device to send a message (e.g. a service request) to another
 {"message": "send-message", 
  "device": <to_device>, 
  "id": <fq_message_id>,  
- "params": <json_params>}
+ "params": <params>}
 ```
-`to_device` - the name of the device to which the message is directed  
-`fq_message_id` - fully qualified message identifier *see service reference for definitions*  
-`json_params` - parameters of the message, expressed in JSON format  
+`to_device ::= string` - the name of the device to which the message is directed  
+`fq_message_id ::= string` - fully qualified message identifier *see service reference for definitions*  
+`params ::= string` - parameters of the message
 
 
 ### Message
@@ -192,11 +192,11 @@ Message received by the device when another device sends a message addressed to 
 {"message": "message", 
  "device": <from_device>, 
  "id": <fq_message_id>, 
- "params": <json_params>}
+ "params": <params>}
 ```
-`from_device` - the name of the device who has sent the message to this device  
-`fq_message_id` - fully qualified message identifier *see service reference for definitions*  
-`json_params` - parameters of the message, expressed in JSON format  
+`from_device ::= string` - the name of the device who has sent the message to this device  
+`fq_message_id ::= string` - fully qualified message identifier *see service reference for definitions*  
+`params ::= string` - parameters of the message
 
 
 
