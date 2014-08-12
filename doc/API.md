@@ -219,10 +219,10 @@ Event recived by the device, containing the list of names of all other devices c
 
 ```json
 { "message": "devices-event", 
-  "devices": [ <device1>, <device2>,...,<deviceN> ]
+  "devices": [ <deviceA>, <deviceB>,...,<deviceN> ]
 }
 ```
-`device1, device2, deviceN ::= string` - names of devices connected to the channel
+`deviceA, deviceB, deviceN ::= string` - names of devices connected to the channel
 
 
 
