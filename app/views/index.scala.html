@@ -33,8 +33,9 @@
         <button id="sendMessageBtn">Send</button>
     </div>
     <div class="panel">
-        <span class="panelHeader">Channel info:</span>
+        <span class="panelHeader">Actions:</span>
         <button id="getDevices">Get connected devices</button>
+        <button id="clear">Clear log</button>
     </div>
     
     <div class="panel">
@@ -109,6 +110,11 @@
 
       $('#getDevices').click(function(){
           connection.getDevices();
+      });
+      
+      
+      $('#clear').click(function(){
+    	  $('#chatLog').text("");
       });
       
       
