@@ -1,7 +1,7 @@
 # Channel API Messages specification
-*document rev 0.2*
+*document rev 0.3*
 
-The idea of the communication channel is central to the followit24.com service. A few simple rules apply:
+The idea of the communication channel is central to the followit24.com service. A few simple principles apply:
 
 * Every device that wants to exchange information using followit24.com must connect to a channel
 * Channels are created by users who have accounts with followit24.com. One user account can create and manage multiple channels. 
@@ -24,7 +24,7 @@ Example of a fully qualified device name:
 john_smith.my_home_devices.hallway_switch
 ```
 
-
+*Note, that the devices need not be physical entities. They may be pure software constructs. Hence a single physical device may appear as a number of devices from the perspective of the channel*
 
 Devices connect to channels using websocket protocol. All messages passed between the device and the channel are in JSON format. Below you will find the complete reference of all the messages that constitute the channel API
 
@@ -219,9 +219,10 @@ Event recived by the device, containing the list of names of all other devices c
 
 ```json
 { "message": "devices-event", 
-  "devices": <device_name_list>}
+  "devices": [ <device1>, <device2>,...,<deviceN> ]
+}
 ```
-`device_name_list` - list of device names expressed as JSON list (i.e. [dev_1, dev_2, dev_3....]
+`device1, device2, deviceN ::= string` - names of devices connected to the channel
 
 
 
