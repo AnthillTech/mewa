@@ -25,7 +25,7 @@ For more details check [API Messages Specification](doc/API.md)
 ## Instalation
 * Install Java JDK if you don't already have it on the system.
 * Clone application to local dysk
-* Run: activator run
+* Run: `activator run`
 * The application will start listening on port 9000
 
 
