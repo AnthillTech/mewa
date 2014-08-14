@@ -7,119 +7,20 @@ import akka.event.Logging
 import play.api.libs.json._
 import com.anthill.channels.ChannelManagerActor
 import com.anthill.channels.ChannelActor
+import cc.mewa.api.Protocol._
 
 
 
 object WebSocketActor {
   def props(out: ActorRef) = Props(new WebSocketActor(out))
   
-  /** Commands send between client and socket actor. */
-  sealed trait ClientMessage
-  
-  /** 
-   *  Connect client to the channel  
-   *  JSON format:
-   *  {"message": "connect", "channel":"channel name", "device":"device1", "password":"channel password"}
-   */
-  case class ConnectToChannel(channel: String, device: String, password: String) extends ClientMessage
-  /** 
-   *  Notify client that it was successfully connected to the channel. 
-   *  JSON format: 
-   *  {"message": "connected"}  
-   */
-  case object ConnectedEvent extends ClientMessage
-  
-  /** 
-   *  Disconnect from channel.
-   *  JSON format: 
-   *  {"message": "disconnect"}  
-   */
-  case object DisconnectFromChannel extends ClientMessage
-  /** 
-   *  Notify client that it was disconnected from channel. 
-   *  JSON format: 
-   *  {"message": "disconnected"}  
-   */
-  case object DisconnectedEvent extends ClientMessage
-  
-  /** 
-   *  Client can be connected only to one channel at the time. 
-   *  JSON format: 
-   *  {"message": "already-connected-error"}  
-   */
-  case object AlreadyConnectedError extends ClientMessage
-  /** 
-   *  Wrong credentials. 
-   *  JSON format: 
-   *  {"message": "authorization-error"}  
-   */
-  case object AuthorizationError extends ClientMessage
-  /** 
-   *  There is no connection to the channel. 
-   *  JSON format: 
-   *  {"message": "not-connected-error"}  
-   */
-  case object NotConnectedError extends ClientMessage
-  
-  /** 
-   *  Device joined channel event
-   *  JSON format: 
-   *  { "message": "joined-channel", "device": "device name"}  
-   */
-  case class DeviceJoinedChannel(device: String) extends ClientMessage
-  
-  /** 
-   *  Device left channel event
-   *  JSON format: 
-   *  { "message": "left-channel", "device": "device name"}  
-   */
-  case class DeviceLeftChannel(device: String) extends ClientMessage
-  
-
-  /** 
-   *  Send event to the channel 
-   *  JSON format: 
-   *  {"message": "send-event", "id": "eventId", "params":"json with params"}  
-   */
-  case class SendEvent(eventId: String, params: String) extends ClientMessage
-  /** 
-   *  Notify client about new event send by other clients to the connected channel 
-   *  JSON format: 
-   *  {"message": "event", "device": "device1", "id": "eventId", "params":"json"}
-   */
-  case class Event(fromDevice: String, eventId: String, params: String) extends ClientMessage
-  /** 
-   *  Send message to specific device 
-   *  JSON format: 
-   *  {"message": "send-message", "device": "device1", "id": "messageId", "params":"message parameters"}
-   */
-  case class SendMessage(targetDevice: String, messageId: String, params: String) extends ClientMessage
-  /** 
-   *  Notify client about message send from other device 
-   *  JSON format: 
-   *  {"message": "message", "device": "source", "id": "messageId", "params":"message params"}
-   */
-  case class Message(fromDevice: String, messageId: String, params: String) extends ClientMessage  
-  
-  /** 
-   *  Ask for list of all connect to the channel devices. 
-   *  JSON format: 
-   *  {"message": "get-devices"}  
-   */
-  case object GetDevices extends ClientMessage
-  /** 
-   *  Event with list of all connected devices 
-   *  JSON format: 
-   *  {"message": "devices-event", "devices":["device1", "device2"]}  
-   */
-  case class DevicesEvent(names: Seq[String]) extends ClientMessage
 
   /**
-   * Formats WebSocket frames to be ClientMessages
+   * Formats WebSocket frames to be MewaMessages
    */
-  implicit def jsonFrameFormatter: FrameFormatter[ClientMessage] = FrameFormatter.jsonFrame.transform(
+  implicit def jsonFrameFormatter: FrameFormatter[MewaMessage] = FrameFormatter.jsonFrame.transform(
     msg => Json.toJson(msg),
-    json => Json.fromJson[ClientMessage](json).fold(
+    json => Json.fromJson[MewaMessage](json).fold(
       invalid => throw new RuntimeException("Bad client message on WebSocket: " + invalid),
       valid => valid
     )
@@ -128,7 +29,7 @@ object WebSocketActor {
   /**
    * Convert message to JSON
    */
-  implicit val msgToJson = Writes[ClientMessage]{
+  implicit val msgToJson = Writes[MewaMessage]{
       
       case msg: ConnectToChannel => Json.obj( "message" -> "connect" 
                                             , "channel" -> msg.channel 
@@ -156,7 +57,7 @@ object WebSocketActor {
   /**
    * Create message from JSON
    */
-  implicit val msgFromJson = Reads[ClientMessage]{jsval => 
+  implicit val msgFromJson = Reads[MewaMessage]{jsval => 
     (jsval \ "message").as[String] match {
       case "connect" => connectFromJson(jsval)
       case "disconnect" => JsSuccess(DisconnectFromChannel)

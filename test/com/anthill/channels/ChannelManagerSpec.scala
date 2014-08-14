@@ -23,7 +23,7 @@ class ChannelManagerSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   def this() = this(ActorSystem("ChannelManagerActorSpec"))
  
   override def beforeAll {
-    val channelManager = system.actorOf(Props[ChannelManagerActor], "channel-manager")
+    val channelManager = system.actorOf(ChannelManagerActor.props(None), "channel-manager")
   }
  
   override def afterAll {

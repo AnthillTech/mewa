@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import com.anthill.channels.ChannelActor._
 import akka.testkit.TestProbe
-import actors.WebSocketActor.GetDevices
+import cc.mewa.api.Protocol.GetDevices
 
 
 

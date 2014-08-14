@@ -11,6 +11,7 @@ import scala.concurrent.duration._
 import akka.actor.Identify
 import akka.actor.ActorIdentity
 import com.anthill.channels.ChannelActor
+import cc.mewa.api.Protocol._
 
 
 /**
@@ -24,7 +25,7 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   def this() = this(ActorSystem("WebSocketActorSpec"))
  
   override def beforeAll {
-    val channelManager = system.actorOf(Props[ChannelManagerActor], "channel-manager")
+    val channelManager = system.actorOf(ChannelManagerActor.props(None), "channel-manager")
   }
  
   override def afterAll {
@@ -48,12 +49,6 @@ class WebSocketActorSpec(_system: ActorSystem) extends TestKit(_system) with Imp
     "refuse connection with wrong channel name" in {
       val wsActor = system.actorOf(WebSocketActor.props(self))
       wsActor ! ConnectToChannel("", "", "pass")
-      expectMsg(AuthorizationError)
-    }
- 
-    "refuse connection with wrong password" in {
-      val wsActor = system.actorOf(WebSocketActor.props(self))
-      wsActor ! ConnectToChannel("test", "", "")
       expectMsg(AuthorizationError)
     }
  

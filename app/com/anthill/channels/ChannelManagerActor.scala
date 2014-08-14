@@ -2,13 +2,12 @@ package com.anthill.channels
 
 import akka.actor.{Actor, ActorRef, Props, ActorLogging}
 import dispatch._, Defaults._
-import play.api.Play
 
 
 
 
 object ChannelManagerActor {
-  def props() = Props(new ChannelManagerActor())
+  def props(authtUrl: Option[String]) = Props(new ChannelManagerActor(authtUrl))
   
     /** Channel manager messages */
   sealed trait ChannelManagerMessage
@@ -24,7 +23,7 @@ object ChannelManagerActor {
 /**
  * Channel
  */
-class ChannelManagerActor extends Actor with ActorLogging{
+class ChannelManagerActor(auth: Option[String]) extends Actor with ActorLogging{
 
   import ChannelManagerActor._
   
@@ -34,23 +33,33 @@ class ChannelManagerActor extends Actor with ActorLogging{
       processGetChannel(sender, channel, device, password)
   }
 
-  val apiAuthtUrl = Play.current.configuration.getString("auth.url").getOrElse("")
 
   def processGetChannel(sender: ActorRef, channel: String, device: String, password: String): Unit = {
-    if(apiAuthtUrl.length > 0){
-      val authRequest = url(apiAuthtUrl).POST
-                          .addParameter("channel", channel)
-                          .addParameter("password", password)
-      for (response <- Http(authRequest OK as.String)){
-        if(response == "ok")                    
+    
+    auth match {
+      case Some(authUrl) => 
+        val authRequest = url(authUrl).POST
+                            .addParameter("channel", channel)
+                            .addParameter("password", password)
+        for (response <- Http(authRequest OK as.String)){
+          if(response == "ok")                    
+            sender ! ChannelFound(getOrCreateChannel(channel))
+          else
+            sender ! AuthorizationError
+        }
+        
+      case None =>
+        if(isValidChannelName(channel)){
           sender ! ChannelFound(getOrCreateChannel(channel))
-        else
+        }
+        else{
           sender ! AuthorizationError
-      }
+        }
     }
-    else{
-      sender ! ChannelFound(getOrCreateChannel(channel))
-    }
+  }
+  
+  def isValidChannelName(name: String): Boolean = {
+    name.length > 0
   }
   
   /** Find or create channel actor */
