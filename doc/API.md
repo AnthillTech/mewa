@@ -1,5 +1,6 @@
-# Channel API Messages specification
-*document rev 0.3*
+# Channel API spec v.0.5
+
+*This protocol is still under development. It means that it can change in the future in this way, that it will break backward compatibility*
 
 The idea of the communication channel is central to the followit24.com service. A few simple principles apply:
 
@@ -225,5 +226,4 @@ Event recived by the device, containing the list of names of all other devices c
 `deviceA, deviceB, deviceN ::= string` - names of devices connected to the channel
 
 
-
-
+*document rev 0.3*
