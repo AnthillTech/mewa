@@ -8,7 +8,7 @@ import play.api.test._
 import play.api.test.Helpers._
 import play.api.libs.json.JsSuccess
 import cc.mewa.api.Protocol._
-import actors.WebSocketActor._
+import actors.ConnectionActor._
 
 
 object MewaMessageJsonSpec extends Specification{

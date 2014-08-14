@@ -11,8 +11,8 @@ import cc.mewa.api.Protocol._
 
 
 
-object WebSocketActor {
-  def props(out: ActorRef) = Props(new WebSocketActor(out))
+object ConnectionActor {
+  def props(out: ActorRef) = Props(new ConnectionActor(out))
   
 
   /**
@@ -134,9 +134,9 @@ object WebSocketActor {
 /**
  * WebSocket actor implementation
  */
-class WebSocketActor(socket: ActorRef) extends Actor with ActorLogging{
+class ConnectionActor(socket: ActorRef) extends Actor with ActorLogging {
  
-  import WebSocketActor._
+  import ConnectionActor._
 
   var connectedChannel : Option[ActorRef] = None
   var socketName: String = ""

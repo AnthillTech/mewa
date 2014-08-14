@@ -3,8 +3,8 @@ package controllers
 import play.api._
 import play.api.mvc._
 import play.api.Play.current
-import actors.WebSocketActor._
-import actors.WebSocketActor
+import actors.ConnectionActor._
+import actors.ConnectionActor
 import play.api.libs.json.JsValue
 import cc.mewa.api.Protocol.MewaMessage
 
@@ -18,7 +18,7 @@ object Application extends Controller {
   }
 
   def ws = WebSocket.acceptWithActor[MewaMessage, MewaMessage] { request => out =>
-    WebSocketActor.props(out)
+    ConnectionActor.props(out)
   }
   
 }
