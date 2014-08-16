@@ -10,7 +10,6 @@ resolvers += "Sonatype Releases" at "http://oss.sonatype.org/content/repositorie
 
 
 libraryDependencies ++= Seq(
-  anorm,
   cache,
   ws,
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.1",
