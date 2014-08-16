@@ -19,3 +19,4 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.11.4" % "test"
 )
 
+scalacOptions ++= Seq("-feature")
