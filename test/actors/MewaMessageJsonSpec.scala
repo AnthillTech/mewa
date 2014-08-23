@@ -33,7 +33,7 @@ class ConnectMessageSpec extends Specification {
 
   "Connect message" should {
     
-    val expected = """{ "message":"connect",
+    val expected = """{ "type":"connect",
 												"channel":"name",
 												"device":"device1",
 												"password":"pass" }
@@ -60,7 +60,7 @@ class DisconnectMessageSpec extends Specification {
 
   "Disconnect message" should {
     
-    val expected = """{"message":"disconnect"}"""
+    val expected = """{"type":"disconnect"}"""
     
     "serialize to json" in {
       val msg : MewaMessage = DisconnectFromChannel
@@ -84,7 +84,7 @@ class ConnectedEventSpec extends Specification {
 
   "ConnectedEvent message" should {
     
-    val expected = """{"message":"connected"}"""
+    val expected = """{"type":"connected"}"""
     
     "serialize to json" in {
       val msg : MewaMessage = ConnectedEvent
@@ -107,7 +107,7 @@ class AlreadyConnectedErrorSpec extends Specification {
 
   "AlreadyConnectedError message" should {
     
-    val expected = """{"message":"already-connected-error"}"""
+    val expected = """{"type":"already-connected-error"}"""
     
     "serialize to json" in {
       val msg : MewaMessage = AlreadyConnectedError
@@ -130,7 +130,7 @@ class AuthorizationErrorSpec extends Specification {
 
   "AuthorizationError message" should {
     
-    val expected = """{"message":"authorization-error"}"""
+    val expected = """{"type":"authorization-error"}"""
     
     "serialize to json" in {
       val msg : MewaMessage = AuthorizationError
@@ -153,7 +153,7 @@ class NotConnectedErrorSpec extends Specification {
 
   "NotConnectedError message" should {
     
-    val expected = """{"message":"not-connected-error"}"""
+    val expected = """{"type":"not-connected-error"}"""
     
     "serialize to json" in {
       val msg : MewaMessage = NotConnectedError
@@ -175,7 +175,7 @@ class DisconnectedEventSpec extends Specification {
 
   "DisconnectedEvent message" should {
     
-    val expected = """{"message":"disconnected"}"""
+    val expected = """{"type":"disconnected"}"""
     
     "serialize to json" in {
       val msg : MewaMessage = DisconnectedEvent
@@ -198,7 +198,7 @@ class DeviceJonedChannelSpec extends Specification {
 
   "DeviceJonedChannel message" should {
     
-    val expected = """{ "message": "joined-channel", "device": "device1"}""".replaceAll("\\s+", "")
+    val expected = """{ "type": "joined-channel", "device": "device1"}""".replaceAll("\\s+", "")
     
     "serialize to json" in {
       val msg :MewaMessage = DeviceJoinedChannel("device1")
@@ -221,7 +221,7 @@ class DeviceLeftChannelSpec extends Specification {
 
   "DeviceJonedLeft message" should {
     
-    val expected = """{ "message": "left-channel", "device": "device1"}""".replaceAll("\\s+", "")
+    val expected = """{ "type": "left-channel", "device": "device1"}""".replaceAll("\\s+", "")
     
     "serialize to json" in {
       val msg :MewaMessage = DeviceLeftChannel("device1")
@@ -244,7 +244,7 @@ class SendEventSpec extends Specification {
 
   "SendEvent message" should {
     
-    val expected = """{"message": "send-event", "id": "eventId", "params":"params1"}
+    val expected = """{"type": "send-event", "id": "eventId", "params":"params1"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
@@ -268,7 +268,7 @@ class EventSpec extends Specification {
 
   "Event message" should {
     
-    val expected = """{"message": "event", "device": "device1", "id": "service.event1", "params":"json"}
+    val expected = """{"type": "event", "device": "device1", "id": "service.event1", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
@@ -292,7 +292,7 @@ class SendMessageSpec extends Specification {
 
   "SendMessage message" should {
     
-    val expected = """{"message": "send-message", "device": "device1", "id": "messageId", "params":"json"}
+    val expected = """{"type": "send-message", "device": "device1", "id": "messageId", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
@@ -316,7 +316,7 @@ class MessageSpec extends Specification {
 
   "Message message" should {
     
-    val expected = """{"message": "message", "device": "source", "id": "messageId", "params":"json"}
+    val expected = """{"type": "message", "device": "source", "id": "messageId", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
@@ -340,7 +340,7 @@ class GetDevicesSpec extends Specification {
 
   "GetDevices message" should {
     
-    val expected = """{"message":"get-devices"}"""
+    val expected = """{"type":"get-devices"}"""
     
     "serialize to json" in {
       val msg : MewaMessage = GetDevices
@@ -363,7 +363,7 @@ class DevicesEventSpec extends Specification {
 
   "DevicesEvent message" should {
     
-    val expected = """{ "message":"devices-event",
+    val expected = """{ "type":"devices-event",
 												"devices": ["device1", "device2"] }
 									 """.replaceAll("\\s+", "")
     

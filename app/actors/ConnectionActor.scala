@@ -31,34 +31,34 @@ object ConnectionActor {
    */
   implicit val msgToJson = Writes[MewaMessage]{
       
-      case msg: ConnectToChannel => Json.obj( "message" -> "connect" 
+      case msg: ConnectToChannel => Json.obj( "type" -> "connect" 
                                             , "channel" -> msg.channel 
                                             , "device" -> msg.device
                                             , "password" -> msg.password )
-      case DisconnectFromChannel => Json.obj("message" -> "disconnect")
-      case AlreadyConnectedError => Json.obj("message" -> "already-connected-error")
-      case AuthorizationError => Json.obj("message" -> "authorization-error")
-      case NotConnectedError => Json.obj("message" -> "not-connected-error")
-      case ConnectedEvent => Json.obj("message" -> "connected")
-      case DisconnectedEvent => Json.obj("message" -> "disconnected")
+      case DisconnectFromChannel => Json.obj("type" -> "disconnect")
+      case AlreadyConnectedError => Json.obj("type" -> "already-connected-error")
+      case AuthorizationError => Json.obj("type" -> "authorization-error")
+      case NotConnectedError => Json.obj("type" -> "not-connected-error")
+      case ConnectedEvent => Json.obj("type" -> "connected")
+      case DisconnectedEvent => Json.obj("type" -> "disconnected")
 
-      case msg:DeviceJoinedChannel => Json.obj("message" -> "joined-channel", "device" -> msg.device)                                                                                                                        
-      case msg:DeviceLeftChannel => Json.obj("message" -> "left-channel", "device" -> msg.device)                                                                                                                        
+      case msg:DeviceJoinedChannel => Json.obj("type" -> "joined-channel", "device" -> msg.device)                                                                                                                        
+      case msg:DeviceLeftChannel => Json.obj("type" -> "left-channel", "device" -> msg.device)                                                                                                                        
 
-      case msg: SendEvent => Json.obj( "message" -> "send-event", "id" -> msg.eventId, "params" ->msg.params )
-      case msg: Event => Json.obj( "message" -> "event", "device" -> msg.fromDevice, "id" -> msg.eventId, "params" ->msg.params )
-      case msg: SendMessage => Json.obj( "message" -> "send-message", "device" -> msg.targetDevice, "id" -> msg.messageId, "params" ->msg.params )
-      case msg: Message => Json.obj( "message" -> "message", "device" -> msg.fromDevice, "id" -> msg.messageId, "params" ->msg.params )
+      case msg: SendEvent => Json.obj( "type" -> "send-event", "id" -> msg.eventId, "params" ->msg.params )
+      case msg: Event => Json.obj( "type" -> "event", "device" -> msg.fromDevice, "id" -> msg.eventId, "params" ->msg.params )
+      case msg: SendMessage => Json.obj( "type" -> "send-message", "device" -> msg.targetDevice, "id" -> msg.messageId, "params" ->msg.params )
+      case msg: Message => Json.obj( "type" -> "message", "device" -> msg.fromDevice, "id" -> msg.messageId, "params" ->msg.params )
 
-      case GetDevices => Json.obj("message" -> "get-devices")
-      case msg:DevicesEvent => Json.obj("message" -> "devices-event", "devices" -> msg.names)                                                                                                                        
+      case GetDevices => Json.obj("type" -> "get-devices")
+      case msg:DevicesEvent => Json.obj("type" -> "devices-event", "devices" -> msg.names)                                                                                                                        
   }
 
   /**
    * Create message from JSON
    */
   implicit val msgFromJson = Reads[MewaMessage]{jsval => 
-    (jsval \ "message").as[String] match {
+    (jsval \ "type").as[String] match {
       case "connect" => connectFromJson(jsval)
       case "disconnect" => JsSuccess(DisconnectFromChannel)
       case "connected" => JsSuccess(ConnectedEvent)
