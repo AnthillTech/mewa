@@ -119,8 +119,10 @@ Notifies all connected devices of the connection of a new device to the channel
 **to:**   the device  
 ```json
 { "type": "joined-channel", 
-"device": <device_name>}
+  "time": <timestamp>,
+  "device": <device_name>}
 ```
+`timestamp` - ISO 8601 time when packed was processed in the channel
 `device_name` - name of the device who has joined the channel
 
 
@@ -131,8 +133,10 @@ Notifies all connected devices of the disconnection of another device from the c
 
 ```json
 { "type": "left-channel", 
-"device": <device name>}
+  "time": <timestamp>,
+  "device": <device name>}
 ```
+`timestamp` - ISO 8601 time when packed was processed in the channel
 `device_name` - name of the device who has left the channel
 
 
@@ -158,11 +162,13 @@ Packet received by the device when another device sends out an event notificatio
 **to:**   all devices  
 
 ```json
-{"type": "event", 
- "device": <from_device>, 
- "id":  <fq_event_id>, 
- "params":<params>}
+{ "type": "event", 
+  "time": <timestamp>,
+  "device": <from_device>, 
+  "id":  <fq_event_id>, 
+  "params":<params>}
 ```
+`timestamp` - ISO 8601 time when packed was processed in the channel
 `from_device ::= string` - the name of the device that has sent the event message  
 `fq_event_id ::= string` - fully qualified event identifier *see service reference for definitions*  
 `params ::= string` - parameters of the event 
@@ -190,11 +196,13 @@ Packet received by the device when another device sends a message addressed to i
 **to:**   the device  
 
 ```json
-{"type": "message", 
- "device": <from_device>, 
- "id": <fq_message_id>, 
- "params": <params>}
+{ "type": "message", 
+  "time": <timestamp>,
+  "device": <from_device>, 
+  "id": <fq_message_id>, 
+  "params": <params>}
 ```
+`timestamp` - ISO 8601 time when packed was processed in the channel
 `from_device ::= string` - the name of the device who has sent the message to this device  
 `fq_message_id ::= string` - fully qualified message identifier *see service reference for definitions*  
 `params ::= string` - parameters of the message
@@ -220,10 +228,12 @@ Packet recived by the device, containing the list of names of all other devices 
 
 ```json
 { "type": "devices-event", 
+  "time": <timestamp>,
   "devices": [ <deviceA>, <deviceB>,...,<deviceN> ]
 }
 ```
+`timestamp` - ISO 8601 time when packed was processed in the channel
 `deviceA, deviceB, deviceN ::= string` - names of devices connected to the channel
 
 
-*document rev 0.4*
+*document rev 0.5*
