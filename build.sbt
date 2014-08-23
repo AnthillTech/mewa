@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.1",
-  "cc.mewa" %% "mewa-api" % "0.7",
+  "cc.mewa" %% "mewa-api" % "0.8",
   "org.scalatest" % "scalatest_2.11" % "2.2.0" % "test",
   "com.typesafe.akka" %% "akka-testkit" % "2.3.3" % "test", 
   "org.scalacheck" %% "scalacheck" % "1.11.4" % "test"

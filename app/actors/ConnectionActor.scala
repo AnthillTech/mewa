@@ -42,16 +42,16 @@ object ConnectionActor {
       case ConnectedEvent => Json.obj("type" -> "connected")
       case DisconnectedEvent => Json.obj("type" -> "disconnected")
 
-      case msg:DeviceJoinedChannel => Json.obj("type" -> "joined-channel", "device" -> msg.device)                                                                                                                        
-      case msg:DeviceLeftChannel => Json.obj("type" -> "left-channel", "device" -> msg.device)                                                                                                                        
+      case msg:DeviceJoinedChannel => Json.obj("type" -> "joined-channel", "time" -> msg.timeStamp, "device" -> msg.device)                                                                                                                        
+      case msg:DeviceLeftChannel => Json.obj("type" -> "left-channel", "time" -> msg.timeStamp, "device" -> msg.device)                                                                                                                        
 
       case msg: SendEvent => Json.obj( "type" -> "send-event", "id" -> msg.eventId, "params" ->msg.params )
-      case msg: Event => Json.obj( "type" -> "event", "device" -> msg.fromDevice, "id" -> msg.eventId, "params" ->msg.params )
+      case msg: Event => Json.obj( "type" -> "event", "time" -> msg.timeStamp, "device" -> msg.fromDevice, "id" -> msg.eventId, "params" ->msg.params )
       case msg: SendMessage => Json.obj( "type" -> "send-message", "device" -> msg.targetDevice, "id" -> msg.messageId, "params" ->msg.params )
-      case msg: Message => Json.obj( "type" -> "message", "device" -> msg.fromDevice, "id" -> msg.messageId, "params" ->msg.params )
+      case msg: Message => Json.obj( "type" -> "message", "time" -> msg.timeStamp, "device" -> msg.fromDevice, "id" -> msg.messageId, "params" ->msg.params )
 
       case GetDevices => Json.obj("type" -> "get-devices")
-      case msg:DevicesEvent => Json.obj("type" -> "devices-event", "devices" -> msg.names)                                                                                                                        
+      case msg:DevicesEvent => Json.obj("type" -> "devices-event", "time" -> msg.timeStamp, "devices" -> msg.names)                                                                                                                        
   }
 
   /**
@@ -89,12 +89,12 @@ object ConnectionActor {
 
   def joinedChannelFromJson(jsval:JsValue): JsResult[DeviceJoinedChannel] = { 
     val deviceName = (jsval \ "device").as[String]
-    JsSuccess(DeviceJoinedChannel(deviceName))
+    JsSuccess(DeviceJoinedChannel("", deviceName))
   }
 
   def leftChannelFromJson(jsval:JsValue): JsResult[DeviceLeftChannel] = { 
     val deviceName = (jsval \ "device").as[String]
-    JsSuccess(DeviceLeftChannel(deviceName))
+    JsSuccess(DeviceLeftChannel("", deviceName))
   }
 
   def sendEventFromJson(jsval:JsValue): JsResult[SendEvent] = { 
@@ -107,7 +107,7 @@ object ConnectionActor {
     val device : String= (jsval \ "device").as[String]
     val eventId = (jsval \ "id").as[String]
     val params : String= (jsval \ "params").as[String]
-    JsSuccess(Event(device, eventId, params))
+    JsSuccess(Event("", device, eventId, params))
   }
 
   def sendMessageFromJson(jsval:JsValue): JsResult[SendMessage] = { 
@@ -121,12 +121,12 @@ object ConnectionActor {
     val device : String= (jsval \ "device").as[String]
     val msgId = (jsval \ "id").as[String]
     val params : String= (jsval \ "params").as[String]
-    JsSuccess(Message(device, msgId, params))
+    JsSuccess(Message("", device, msgId, params))
   }
 
   def devicesEventFromJson(jsval:JsValue): JsResult[DevicesEvent] = { 
     val deviceNames = (jsval \ "devices").as[List[String]]
-    JsSuccess(DevicesEvent(deviceNames))
+    JsSuccess(DevicesEvent("", deviceNames))
   }
 }
 
@@ -175,28 +175,28 @@ class ConnectionActor(socket: ActorRef) extends Actor with ActorLogging {
   def connected(channel: ActorRef): Actor.Receive = {
     
     case msg @ SendEvent(eventId, value) =>
-      channel ! ChannelActor.Fanout(socketName, msg)
+      channel ! ChannelActor.Fanout(socketName, msg, "")
 
-    case ChannelActor.Fanout(from, msg @ SendEvent(eventId, value)) =>
-      socket ! Event(from, eventId, value)
+    case ChannelActor.Fanout(from, msg @ SendEvent(eventId, value), ts) =>
+      socket ! Event(ts, from, eventId, value)
       
     case msg @ SendMessage(targetDevice, messageId, params) =>
-      channel ! ChannelActor.SendToDevice(socketName, targetDevice, msg)
+      channel ! ChannelActor.SendToDevice(socketName, targetDevice, msg, "")
             
-    case ChannelActor.SendToDevice(from, toDevice, msg @ SendMessage(device, msgId, params)) =>
-      socket ! Message(from, msgId, params)
+    case ChannelActor.SendToDevice(from, toDevice, msg @ SendMessage(device, msgId, params), ts) =>
+      socket ! Message(ts, from, msgId, params)
       
     case GetDevices =>
       channel ! ChannelActor.GetConnectedDevices
       
-    case ChannelActor.ConnectedDevices(devices) =>
-      socket ! DevicesEvent(devices)
+    case ChannelActor.ConnectedDevices(devices, ts) =>
+      socket ! DevicesEvent(ts, devices)
       
-    case ChannelActor.JoinedChannelEvent(deviceName) =>
-      socket ! DeviceJoinedChannel(deviceName)
+    case ChannelActor.JoinedChannelEvent(deviceName, ts) =>
+      socket ! DeviceJoinedChannel(ts, deviceName)
       
-    case ChannelActor.LeftChannelEvent(deviceName) =>
-      socket ! DeviceLeftChannel(deviceName)
+    case ChannelActor.LeftChannelEvent(deviceName, ts) =>
+      socket ! DeviceLeftChannel(ts, deviceName)
     
     case DisconnectFromChannel =>
       channel ! ChannelActor.UnRegisterDevice(socketName)

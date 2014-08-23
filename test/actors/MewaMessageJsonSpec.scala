@@ -198,16 +198,16 @@ class DeviceJonedChannelSpec extends Specification {
 
   "DeviceJonedChannel message" should {
     
-    val expected = """{ "type": "joined-channel", "device": "device1"}""".replaceAll("\\s+", "")
+    val expected = """{ "type": "joined-channel", "time": "", "device": "device1"}""".replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :MewaMessage = DeviceJoinedChannel("device1")
+      val msg: MewaMessage = DeviceJoinedChannel("", "device1")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = DeviceJoinedChannel("device1")
+      val msg = DeviceJoinedChannel("", "device1")
       assertFromJson(msg)
     }
   }
@@ -221,16 +221,16 @@ class DeviceLeftChannelSpec extends Specification {
 
   "DeviceJonedLeft message" should {
     
-    val expected = """{ "type": "left-channel", "device": "device1"}""".replaceAll("\\s+", "")
+    val expected = """{ "type": "left-channel", "time": "", "device": "device1"}""".replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :MewaMessage = DeviceLeftChannel("device1")
+      val msg :MewaMessage = DeviceLeftChannel("", "device1")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = DeviceLeftChannel("device1")
+      val msg = DeviceLeftChannel("", "device1")
       assertFromJson(msg)
     }
   }
@@ -268,17 +268,17 @@ class EventSpec extends Specification {
 
   "Event message" should {
     
-    val expected = """{"type": "event", "device": "device1", "id": "service.event1", "params":"json"}
+    val expected = """{"type": "event", "time": "", "device": "device1", "id": "service.event1", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :MewaMessage = Event("device1", "service.event1", "json")
+      val msg :MewaMessage = Event("", "device1", "service.event1", "json")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = Event("device1", "service.event1", "json")
+      val msg = Event("", "device1", "service.event1", "json")
       assertFromJson(msg)
     }
   }
@@ -316,17 +316,17 @@ class MessageSpec extends Specification {
 
   "Message message" should {
     
-    val expected = """{"type": "message", "device": "source", "id": "messageId", "params":"json"}
+    val expected = """{"type": "message", "time": "", "device": "source", "id": "messageId", "params":"json"}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :MewaMessage = Message("source", "messageId", "json")
+      val msg :MewaMessage = Message("", "source", "messageId", "json")
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = Message("source", "messageId", "json")
+      val msg = Message("", "source", "messageId", "json")
       assertFromJson(msg)
     }
   }
@@ -363,18 +363,19 @@ class DevicesEventSpec extends Specification {
 
   "DevicesEvent message" should {
     
-    val expected = """{ "type":"devices-event",
+    val expected = """{ "type":"devices-event", 
+												"time": "",
 												"devices": ["device1", "device2"] }
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg : MewaMessage = DevicesEvent(List("device1", "device2"))
+      val msg : MewaMessage = DevicesEvent("", List("device1", "device2"))
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = DevicesEvent(List("device1", "device2"))
+      val msg = DevicesEvent("", List("device1", "device2"))
       assertFromJson(msg)
     }
   }

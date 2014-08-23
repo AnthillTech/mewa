@@ -70,7 +70,7 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       channel ! ChannelActor.RegisterDevice("testDevice")
       probe.send(socket1, DisconnectFromChannel)
       fishForMessage() {
-        case ChannelActor.LeftChannelEvent("dev1") => true
+        case ChannelActor.LeftChannelEvent("dev1", _) => true
         case _ => false
       }
     }
@@ -84,7 +84,7 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       channel ! ChannelActor.RegisterDevice("testDevice")
       system.stop(socket1)
       fishForMessage() {
-        case ChannelActor.LeftChannelEvent("dev1") => true
+        case ChannelActor.LeftChannelEvent("dev1", _) => true
         case _ => false
       }
     }
@@ -99,7 +99,7 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       probe2.expectMsg(ConnectedEvent)
       probe1.send(socket1, SendEvent("event1", "12"))
       probe2.fishForMessage() {
-        case Event("probe1", "event1", "12") => true
+        case Event(_, "probe1", "event1", "12") => true
         case m => false
       }
     }
@@ -114,7 +114,7 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       probe2.expectMsg(ConnectedEvent)
       probe1.send(socket1, SendMessage("probe2", "event1", "12"))
       probe2.fishForMessage() {
-        case Message("probe1", "event1", "12") => true
+        case Message(_, "probe1", "event1", "12") => true
         case m => false
       }
     }
@@ -129,8 +129,8 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       probe1.expectMsg(ConnectedEvent)
       probe1.send(socket1, GetDevices)
       probe1.fishForMessage() {
-        case DevicesEvent(List("probe1", "probe2")) => true
-        case DevicesEvent(List("probe2", "probe1")) => true
+        case DevicesEvent(_, List("probe1", "probe2")) => true
+        case DevicesEvent(_, List("probe2", "probe1")) => true
         case m =>
           false
       }
