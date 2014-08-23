@@ -72,12 +72,12 @@
             message("Device " + deviceName + " joined channel.");
         }
         
-        connection.onEvent = function(eventId, params){
-            message("Received event <b>" + eventId + "</b> with params: <b>" + params + "</b>");
+        connection.onEvent = function(from, eventId, params, ts){
+            message(ts + ": Received event <b>" + eventId + "</b> with params: <b>" + params + "</b>");
         }
         
-        connection.onMessage = function(device, msgId, params){
-            message("Received message <b>" + msgId + "</b> from <b>" + device + "</b> with params: <b>" + params + "</b>");
+        connection.onMessage = function(device, msgId, params, ts){
+            message(ts + ": Received message <b>" + msgId + "</b> from <b>" + device + "</b> with params: <b>" + params + "</b>");
         }
 
         connection.onDevicesEvent = function(devices){

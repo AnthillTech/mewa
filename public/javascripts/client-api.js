@@ -27,21 +27,21 @@ function channelConnect(url, channelName, deviceName, password){
 		onDeviceLeftChannel: function(name) {},
 		/** send event to all devices */
 		sendEvent: function(eventId, params) {
-			msg = {message: "send-event", id: eventId, params: params}
+			msg = {type: "send-event", id: eventId, params: params}
 	        _connection._sendMsg(msg);
 		},
 		/** Received event */
 		onEvent: function(device, eventId, params) {},
 		/** send event to all devices */
 		sendMessage: function(device, msgId, params) {
-			msg = {message: "send-message", device: device, id: msgId, params: params}
+			msg = {type: "send-message", device: device, id: msgId, params: params}
 	        _connection._sendMsg(msg);
 		},
 		/** Received message */
 		onMessage: function(device, messageId, params) {},
 		/** Get list of all connected to the channel devices */
 		getDevices: function() {
-			msg = {message: "get-devices"}
+			msg = {type: "get-devices"}
 	        _connection._sendMsg(msg);
 		},
 		/** Received set property command */
@@ -66,7 +66,7 @@ function channelConnect(url, channelName, deviceName, password){
 		_connection._socket = new WebSocket(url);
 		try{
 	        _connection._socket.onopen = function(){
-	             _sendJoinMessage()
+	             _sendJoinPacket()
 	        }
 	 
 	        _connection._socket.onclose = function(){
@@ -79,37 +79,37 @@ function channelConnect(url, channelName, deviceName, password){
 	    }	
 	}
 	
-	function _sendJoinMessage(){
-		msg = {message: "connect", channel:channelName, device:deviceName, password:password};
+	function _sendJoinPacket(){
+		msg = {type: "connect", channel:channelName, device:deviceName, password:password};
         _connection._sendMsg(msg);
         _connection._socket.onmessage = function(resp){
         	var event = JSON.parse(resp.data);
-        	if(event.message == "connected"){
+        	if(event.type == "connected"){
         		_connection.onConnected();
-        		_connection._socket.onmessage = _processMessage;
+        		_connection._socket.onmessage = _processPacket;
         	}
         	else{
-        		_connection.onError("Connection error " + event.message);
+        		_connection.onError("Connection error " + event.type);
         	}
         }
 	}
 	
-	function _processMessage(resp){
-		var event = JSON.parse(resp.data);
-		if(event.message == "joined-channel"){
-			_connection.onDeviceJoinedChannel(event.device);
+	function _processPacket(resp){
+		var packet = JSON.parse(resp.data);
+		if(packet.type == "joined-channel"){
+			_connection.onDeviceJoinedChannel(packet.device, packet.time);
 		}
-		else if(event.message == "left-channel"){
-			_connection.onDeviceLeftChannel(event.device);
+		else if(packet.type == "left-channel"){
+			_connection.onDeviceLeftChannel(packet.device, packet.time);
 		}
-		else if(event.message == "event"){
-			_connection.onEvent(event.device, event.id, event.params);
+		else if(packet.type == "event"){
+			_connection.onEvent(packet.device, packet.id, packet.params, packet.time);
 		}
-		else if(event.message == "message"){
-			_connection.onMessage(event.device, event.id, event.params);
+		else if(packet.type == "message"){
+			_connection.onMessage(packet.device, packet.id, packet.params, packet.time);
 		}
-		else if(event.message == "devices-event"){
-			_connection.onDevicesEvent(event.devices);
+		else if(packet.type == "devices-event"){
+			_connection.onDevicesEvent(packet.devices, packet.time);
 		}
 	}
 	
