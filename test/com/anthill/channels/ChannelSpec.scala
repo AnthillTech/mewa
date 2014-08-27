@@ -4,9 +4,13 @@ import akka.actor.{ActorSystem, Actor, Props, ActorRef, ActorSelection}
 import akka.testkit.TestKit
 import org.scalatest.{WordSpecLike, Matchers, BeforeAndAfterAll}
 import akka.testkit.ImplicitSender
+
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import com.anthill.channels.ChannelActor._
+
+import cc.mewa.channels.ChannelActor
+import cc.mewa.channels.ChannelActor._
+
 import akka.testkit.TestProbe
 import cc.mewa.api.Protocol.GetDevices
 

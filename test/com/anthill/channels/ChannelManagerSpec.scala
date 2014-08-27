@@ -4,15 +4,21 @@ import akka.actor.ActorSystem
 import akka.actor.Actor
 import akka.actor.Props
 import akka.testkit.TestKit
+
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll
+
 import akka.testkit.ImplicitSender
+
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
+
 import akka.actor.ActorRef
 import akka.actor.ActorSelection
-import com.anthill.channels.ChannelManagerActor._
+import cc.mewa.channels.ChannelManagerActor;
+
+import cc.mewa.channels.ChannelManagerActor._
 
 
 

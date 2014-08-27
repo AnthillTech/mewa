@@ -5,8 +5,8 @@ import play.api.mvc.WebSocket.FrameFormatter
 import play.api.libs.json.{__, Format, Writes, Reads, Json, JsError}
 import akka.event.Logging
 import play.api.libs.json._
-import com.anthill.channels.ChannelManagerActor
-import com.anthill.channels.ChannelActor
+import cc.mewa.channels.ChannelManagerActor
+import cc.mewa.channels.ChannelActor
 import cc.mewa.api.Protocol._
 
 

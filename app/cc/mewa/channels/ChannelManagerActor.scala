@@ -1,4 +1,4 @@
-package com.anthill.channels
+package cc.mewa.channels
 
 import akka.actor.{Actor, ActorRef, Props, ActorLogging}
 import dispatch._, Defaults._

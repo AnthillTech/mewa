@@ -4,13 +4,13 @@ import akka.actor.{ActorSystem, Actor, Props, ActorRef, PoisonPill}
 import akka.testkit.TestKit
 import akka.testkit.ImplicitSender
 import org.scalatest.{WordSpecLike, Matchers, BeforeAndAfterAll}
-import com.anthill.channels.ChannelManagerActor
+import cc.mewa.channels.ChannelManagerActor
 import akka.util.Timeout
 import akka.testkit.TestProbe
 import scala.concurrent.duration._
 import akka.actor.Identify
 import akka.actor.ActorIdentity
-import com.anthill.channels.ChannelActor
+import cc.mewa.channels.ChannelActor
 import cc.mewa.api.Protocol._
 
 

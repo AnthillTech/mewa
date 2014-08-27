@@ -5,7 +5,7 @@ import play.api.mvc.Results._
 import scala.concurrent.Future
 import play.libs.Akka
 import akka.actor.Props
-import com.anthill.channels.ChannelManagerActor
+import cc.mewa.channels.ChannelManagerActor
 import play.api.Play
 import actors.ConnectionManagerActor
 
