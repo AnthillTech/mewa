@@ -19,7 +19,9 @@ Server API offer the following functionality:
 * Receive event
 * Get list of connected to the channel devices
 
-For more details check [API Messages Specification](doc/API.md)
+For more details check:
+* [WebSocket API Messages Specification](doc/API.md)
+* [HTTP API Specification](doc/HttpAPI.md)
 
 
 ## Instalation

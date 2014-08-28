@@ -67,7 +67,7 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       probe1.send(channel, RegisterDevice("probe1"))
       probe2.send(channel, RegisterDevice("probe2"))
       probe1.expectMsgType[JoinedChannelEvent]
-      val msg = Fanout("probe1", "msg", "")
+      val msg = Fanout("probe1", "msg", "content", "")
       probe1.send(channel, msg)
       probe2.expectMsgType[Fanout]
     }

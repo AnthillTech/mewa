@@ -174,10 +174,10 @@ class ConnectionActor(socket: ActorRef) extends Actor with ActorLogging {
   /** Process messages while connected to the channel */
   def connected(channel: ActorRef): Actor.Receive = {
     
-    case msg @ SendEvent(eventId, value) =>
-      channel ! ChannelActor.Fanout(socketName, msg, "")
+    case SendEvent(eventId, value) =>
+      channel ! ChannelActor.Fanout(socketName, eventId, value, "")
 
-    case ChannelActor.Fanout(from, msg @ SendEvent(eventId, value), ts) =>
+    case ChannelActor.Fanout(from, eventId, value, ts) =>
       socket ! Event(ts, from, eventId, value)
       
     case msg @ SendMessage(targetDevice, messageId, params) =>

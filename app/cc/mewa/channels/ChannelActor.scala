@@ -25,7 +25,7 @@ object ChannelActor {
   case class LeftChannelEvent(deviceName:String, timestamp: String)
   
   case class SendToDevice(fromDevice: String, toDevice: String, message: Any, timestamp: String)
-  case class Fanout(fromDevice: String, message: Any, timestamp: String)
+  case class Fanout(fromDevice: String, eventId: String, content: String, timestamp: String)
   
   case object GetConnectedDevices 
   case class ConnectedDevices(names: Seq[String], timestamp: String)
@@ -55,8 +55,8 @@ class ChannelActor extends Actor with ActorLogging {
     case msg @ SendToDevice(fromDevice, toDevice, message, ts) =>
       devices.get(toDevice) foreach (_ ! SendToDevice(msg.fromDevice, msg.toDevice, msg.message, timeStamp))
 
-    case Fanout(fromDevice, message, ts) =>
-      val event = Fanout(fromDevice, message, timeStamp)
+    case Fanout(fromDevice, eventId, content, ts) =>
+      val event = Fanout(fromDevice, eventId, content, timeStamp)
       devices.filterKeys(_ != fromDevice).values.foreach(_ forward event)
     
     case GetConnectedDevices =>
