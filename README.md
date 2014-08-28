@@ -7,8 +7,10 @@ The API is based on WebSocket communication and consists of JSON structures.
 
 ## Useful links
 
-* Discussion group
-* Commercial support
+* [WebSocket API Messages Specification](doc/API.md)
+* [HTTP API Specification](doc/HttpAPI.md)
+* [Discussion group](http://groups.google.com/d/forum/followit24?hl=en)
+
 
 ## Server API overview
 Server API offer the following functionality:
@@ -18,10 +20,6 @@ Server API offer the following functionality:
 * Send event
 * Receive event
 * Get list of connected to the channel devices
-
-For more details check:
-* [WebSocket API Messages Specification](doc/API.md)
-* [HTTP API Specification](doc/HttpAPI.md)
 
 
 ## Instalation
