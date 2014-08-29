@@ -12,7 +12,6 @@ If device wants to send only events every few secons, then instead of using WebS
 **URL**     /api/event  
 **Method**  POST  
 **POST Params:**  
-
 * channel - Channel to which event should be send
 * password - channel password
 * device - device which sends event
