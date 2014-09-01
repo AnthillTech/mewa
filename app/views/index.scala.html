@@ -84,7 +84,11 @@
         }
         
         connection.onMessage = function(device, msgId, params, ts){
-            message(ts + ": Received message <b>" + msgId + "</b> from <b>" + device + "</b> with params: <b>" + params + "</b>");
+            if(msgId == "com.followit24.service.image.Image"){
+                messageImage(JSON.parse(params).data)                   
+            } else {
+                message(ts + ": Received message <b>" + msgId + "</b> from <b>" + device + "</b> with params: <b>" + params + "</b>");
+            }
         }
 
         connection.onDevicesEvent = function(devices){
@@ -102,6 +106,10 @@
           $('#chatLog').append(msg+'</p>');
       }
 	 	
+      function messageImage(data){
+    	  $('#chatLog').append("<img src='" + data + "'/>");
+      }
+
       $("#sendEventBtn").click(function(event) {
     	  var eventId = $("#eventName").val();
     	  var params = $("#eventParams").val();
