@@ -84,7 +84,7 @@
         }
         
         connection.onMessage = function(device, msgId, params, ts){
-            if(msgId == "com.followit24.service.image.Image"){
+            if(msgId == "org.fi24.image.Image"){
                 messageImage(JSON.parse(params).data)                   
             } else {
                 message(ts + ": Received message <b>" + msgId + "</b> from <b>" + device + "</b> with params: <b>" + params + "</b>");
