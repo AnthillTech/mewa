@@ -5,7 +5,6 @@ import scala.concurrent.duration._
 import play.api._
 import play.api.mvc._
 import play.api.Play.current
-import actors.HttpEventActor
 import play.api.libs.json.JsValue
 import cc.mewa.api.Protocol.MewaMessage
 import play.api.data.Form
@@ -16,11 +15,15 @@ import akka.pattern.ask
 import cc.mewa.channels.ChannelManagerActor
 import akka.actor.ActorRef
 import akka.actor.Props
+import actors.HttpEventActor
 import actors.HttpEventActor.SendEvent
+import actors.HttpActor
+import actors.HttpActor.{Connect, Disconnect}
 
 
 object HttpController extends Controller {
 
+  /** Send event to the channel */
   val eventForm = Form(
     tuple(
       "channel" -> text,
@@ -30,11 +33,51 @@ object HttpController extends Controller {
       "params" -> text
     )
   )
-
+  
   def sendEvent = Action { implicit request =>
     val (channel, password, device, id, params) = eventForm.bindFromRequest.get
     val actor = Akka.system.actorOf(HttpEventActor.props(channel, password, device))
     actor ! SendEvent(id, params)
+    Ok("ok")
+  }
+  
+
+  /** Connect persistent device to the channel.
+   *  Params: 
+   *  url - Messages and events will be send there
+   */
+  val connectForm = Form(
+    tuple(
+      "channel" -> text,
+      "password" -> text,
+      "device" -> text,
+      "url" -> text
+    )
+  )
+
+  def connect = Action { implicit request =>
+    val (channel, password, device, url) = connectForm.bindFromRequest.get
+    val actorName = channel + "-" + device
+    val actor = Akka.system.actorOf(HttpActor.props(channel, password, device, url), actorName)
+    actor ! Connect
+    Ok("ok")
+  }
+  
+
+  /** Disconnect persistent device from the channel.
+   */
+  val disconnectForm = Form(
+    tuple(
+      "channel" -> text,
+      "device" -> text
+    )
+  )
+
+  def disconnect = Action { implicit request =>
+    val (channel, device) = disconnectForm.bindFromRequest.get
+    val actorName = channel + "-" + device
+    val actor = Akka.system.actorSelection("/user/" + actorName)
+    actor ! Disconnect
     Ok("ok")
   }
 }

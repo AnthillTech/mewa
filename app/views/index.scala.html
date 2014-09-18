@@ -42,6 +42,8 @@
     <div class="panel">
         <span class="panelHeader">HTTP interface:</span>
         <button id="postEvent">Send event</button>
+        <button id="httpConnect">Connect Http device</button>
+        <button id="httpDisconnect">Disconnect Http device</button>
     </div>
     
     <hr/>
@@ -77,6 +79,10 @@
       
         connection.onDeviceJoinedChannel = function(deviceName){
             message("Device " + deviceName + " joined channel.");
+        }
+        
+        connection.onDeviceLeftChannel = function(deviceName){
+            message("Device " + deviceName + " left channel.");
         }
         
         connection.onEvent = function(from, eventId, params, ts){
@@ -144,6 +150,36 @@
         		   device: "HttpDevice",
         		   eventId: "httpEvent",
         		   params: "123"}
+          $.ajax({
+              type: "POST",
+              url: url,
+              data: data,
+              success: function(response) {
+              }
+          });
+      });
+      
+      
+      $('#httpConnect').click(function(){
+          var url = "/api/connect";
+          data = { channel: $("#channelName").val(),
+                   password: $("#channelPass").val(),
+                   device: "HttpDevice",
+                   url: "/log"}
+          $.ajax({
+              type: "POST",
+              url: url,
+              data: data,
+              success: function(response) {
+              }
+          });
+      });
+      
+      
+      $('#httpDisconnect').click(function(){
+          var url = "/api/disconnect";
+          data = { channel: $("#channelName").val(),
+                   device: "HttpDevice"}
           $.ajax({
               type: "POST",
               url: url,

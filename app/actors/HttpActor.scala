@@ -9,36 +9,39 @@ import cc.mewa.channels.ChannelManagerActor
 import cc.mewa.channels.ChannelActor
 import cc.mewa.api.Protocol._
 import akka.actor.PoisonPill
+import cc.mewa.channels.ChannelActor.{RegisterDevice, UnRegisterDevice}
 
 
-object HttpEventActor {
-  def props(channel: String, password: String, device: String) = Props(new HttpEventActor(channel, password, device))
+object HttpActor {
+  def props(channel: String, password: String, device: String, url: String) = Props(new HttpActor(channel, password, device, url))
   
-  case class SendEvent(eventId: String, content: String)
+  case object Connect
+  case object Disconnect;
 }
 
 /**
  * Http event actor implementation
  */
-class HttpEventActor(channel: String, password: String, device: String) extends Actor with ActorLogging {
+class HttpActor(channel: String, password: String, device: String, url: String) extends Actor with ActorLogging {
  
-  import HttpEventActor.SendEvent
+  import HttpActor._
   
   
   def receive: Actor.Receive = {
     
-    case SendEvent(id, content) =>
+    case Connect =>
       val manager = context.actorSelection("/user/channel-manager")
       manager ! ChannelManagerActor.GetChannel(channel, device, password)
-      context.become(receiveEvent(id, content))
+      
+    case ChannelManagerActor.ChannelFound(channel) =>
+      channel ! RegisterDevice(device)
+      context.become(receiveConnected(channel))
   }
 
-  def receiveEvent(id: String, content: String): Actor.Receive = {
+  def receiveConnected(channel: ActorRef): Actor.Receive = {
     
-    case ChannelManagerActor.ChannelFound(channel) =>
-      channel ! ChannelActor.Fanout(device, id, content, "")
+    case Disconnect =>
+      channel ! UnRegisterDevice(device)
       self ! PoisonPill
-    
-    case _ => self ! PoisonPill
   }
 }
