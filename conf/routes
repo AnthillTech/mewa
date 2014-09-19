@@ -12,6 +12,8 @@ GET		/ws							controllers.WebSocketController.ws
 POST    /api/event                  controllers.HttpController.sendEvent
 POST    /api/connect                controllers.HttpController.connect
 POST    /api/disconnect             controllers.HttpController.disconnect
+POST    /log/message                controllers.HttpController.logMessage
+POST    /log/event                  controllers.HttpController.logEvent
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

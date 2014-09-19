@@ -62,8 +62,8 @@ object HttpController extends Controller {
     actor ! Connect
     Ok("ok")
   }
-  
 
+  
   /** Disconnect persistent device from the channel.
    */
   val disconnectForm = Form(
@@ -79,5 +79,40 @@ object HttpController extends Controller {
     val actor = Akka.system.actorSelection("/user/" + actorName)
     actor ! Disconnect
     Ok("ok")
+  }
+  
+  
+  /** Send event to the channel */
+  val logEventForm = Form(
+    tuple(
+      "channel" -> text,
+      "device" -> text,
+      "eventId" -> text,
+      "params" -> text
+    )
+  )
+  
+  def logEvent = Action { implicit request =>
+    val (channel, device, id, params) = logEventForm.bindFromRequest.get
+    Logger.info("Received event '" + id + "' on channel '" + channel + "' from " + device)
+    Ok("")
+  }
+  
+  
+  /** Send event to the channel */
+  val logMessageForm = Form(
+    tuple(
+      "channel" -> text,
+      "device" -> text,
+      "messageId" -> text,
+      "params" -> text
+    )
+  )
+  
+  def logMessage = Action { implicit request =>
+    val (channel, device, id, params) = logMessageForm.bindFromRequest.get
+    Logger.info("Received message '" + id + "' on channel '" + channel + "' from " + device)
+    // Echo message
+    Ok(id + "\n" + params)
   }
 }

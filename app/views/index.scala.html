@@ -165,7 +165,7 @@
           data = { channel: $("#channelName").val(),
                    password: $("#channelPass").val(),
                    device: "HttpDevice",
-                   url: "/log"}
+                   url: "@routes.Application.index.absoluteURL(false)" + "log/"}
           $.ajax({
               type: "POST",
               url: url,
