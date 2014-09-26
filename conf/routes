@@ -10,6 +10,7 @@ GET		/ws							controllers.WebSocketController.ws
 
 # HTTP API
 POST    /api/event                  controllers.HttpController.sendEvent
+POST    /api/ask                    controllers.HttpController.askMessage
 POST    /api/connect                controllers.HttpController.connect
 POST    /api/disconnect             controllers.HttpController.disconnect
 POST    /log/message                controllers.HttpController.logMessage

@@ -42,6 +42,26 @@ object HttpController extends Controller {
   }
   
 
+  /** Send message to the channel */
+  val askForm = Form(
+    tuple(
+      "channel" -> text,
+      "password" -> text,
+      "device" -> text,
+      "messageId" -> text,
+      "params" -> text
+    )
+  )
+  
+  /** Send message to the device and return received response */
+  def askMessage = Action { implicit request =>
+    val (channel, password, device, id, params) = eventForm.bindFromRequest.get
+    val actor = Akka.system.actorOf(HttpEventActor.props(channel, password, device))
+    actor ! SendEvent(id, params)
+    Ok("ok")
+  }
+  
+
   /** Connect persistent device to the channel.
    *  Params: 
    *  url - Messages and events will be send there
