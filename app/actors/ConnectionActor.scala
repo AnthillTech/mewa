@@ -8,6 +8,7 @@ import play.api.libs.json._
 import cc.mewa.channels.ChannelManagerActor
 import cc.mewa.channels.ChannelActor
 import cc.mewa.api.Protocol._
+import play.Logger
 
 
 
@@ -134,7 +135,7 @@ object ConnectionActor {
 /**
  * WebSocket actor implementation
  */
-class ConnectionActor(socket: ActorRef) extends Actor with ActorLogging {
+class ConnectionActor(socket: ActorRef) extends Actor{
  
   import ConnectionActor._
 
@@ -151,6 +152,7 @@ class ConnectionActor(socket: ActorRef) extends Actor with ActorLogging {
       socket ! NotConnectedError
     
     case ConnectToChannel(channel, device, password) =>
+      Logger.debug("Connecting device " + device + " to channel " + channel)
       val manager = context.actorSelection("/user/channel-manager")
       manager ! ChannelManagerActor.GetChannel(channel, device, password)
       socketName = device
@@ -199,6 +201,7 @@ class ConnectionActor(socket: ActorRef) extends Actor with ActorLogging {
       socket ! DeviceLeftChannel(ts, deviceName)
     
     case DisconnectFromChannel =>
+      Logger.debug("Disonnecting device " + socketName)
       channel ! ChannelActor.UnRegisterDevice(socketName)
       connectedChannel = None
       context.become(disconnected)
@@ -208,6 +211,7 @@ class ConnectionActor(socket: ActorRef) extends Actor with ActorLogging {
   def receive = disconnected
   
   override def postStop = {
+    Logger.debug("Socket closed for device " + socketName)
     connectedChannel foreach {_ ! ChannelActor.UnRegisterDevice(socketName)}
   }
 }
