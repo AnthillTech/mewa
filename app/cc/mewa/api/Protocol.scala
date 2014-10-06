@@ -17,7 +17,7 @@ object Protocol {
   sealed trait MewaMessage
   
   /** Connect client to the channel */
-  case class ConnectToChannel(channel: String, device: String, password: String) extends MewaMessage
+  case class ConnectToChannel(channel: String, device: String, password: String, listenTo: List[String]) extends MewaMessage
   /** Notify client that it was successfully connected to the channel. */
   case object ConnectedEvent extends MewaMessage
   

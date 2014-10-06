@@ -27,26 +27,47 @@ object MewaMessageJsonSpec extends Specification{
 }
 
 @RunWith(classOf[JUnitRunner])
-class ConnectMessageSpec extends Specification {
+class ConnectMessage1Spec extends Specification {
 
   import MewaMessageJsonSpec._
 
-  "Connect message" should {
+  "Connect message ver 1" should {
+    
+    "deserialize from json" in {
+      val jmsg = Json.obj( "type" -> "connect" 
+                         , "channel" -> "name" 
+                         , "device" -> "device1"
+                         , "password" -> "pass")
+      val msg = ConnectToChannel("name", "device1", "pass", List.empty)
+      val msg2 = Json.fromJson[MewaMessage](jmsg).get
+      msg2 must beEqualTo(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class ConnectMessage2Spec extends Specification {
+
+  import MewaMessageJsonSpec._
+
+  "Connect message ver 2" should {
     
     val expected = """{ "type":"connect",
 												"channel":"name",
 												"device":"device1",
-												"password":"pass" }
+												"password":"pass",
+												"listenTo": ["ala", "ola"] }
 									 """
     
     "serialize to json" in {
-      val msg :MewaMessage = ConnectToChannel("name", "device1", "pass")
+      val msg :MewaMessage = ConnectToChannel("name", "device1", "pass", List("ala", "ola"))
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected.replaceAll("\\s+", ""))
     }
 
     "deserialize from json" in {
-      val msg = ConnectToChannel("name", "device1", "pass")
+      val msg = ConnectToChannel("name", "device1", "pass", List("ala", "ola"))
       assertFromJson(msg)
     }
   }

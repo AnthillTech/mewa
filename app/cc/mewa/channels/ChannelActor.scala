@@ -19,7 +19,7 @@ import java.util.Date
 
 object ChannelActor {
   
-  case class RegisterDevice(deviceName: String)
+  case class RegisterDevice(deviceName: String, acceptEvents: List[String])
   case class UnRegisterDevice(deviceName: String)
   case class JoinedChannelEvent(deviceName:String, timestamp: String)
   case class LeftChannelEvent(deviceName:String, timestamp: String)
@@ -33,6 +33,8 @@ object ChannelActor {
 }
 
 
+case class Subscriber(device: ActorRef, eventPrefixes: Seq[String])
+
 /**
  * Channel actor
  */
@@ -40,26 +42,26 @@ class ChannelActor extends Actor with ActorLogging {
 
   import ChannelActor._
   
-  def broadcaster(devices: Map[String,ActorRef]): Actor.Receive = {
+  def broadcaster(devices: Map[String, Subscriber]): Actor.Receive = {
     
-    case RegisterDevice(name) =>
+    case RegisterDevice(name, eventIds) =>
       val event = JoinedChannelEvent(name, timeStamp)
-      devices.values foreach (_ ! event)
-      context.become(broadcaster(devices + (name -> sender)))
+      devices.values foreach (_.device ! event)
+      context.become(broadcaster(devices + (name -> Subscriber(sender, eventIds))))
     
     case UnRegisterDevice(name) => 
       val event = LeftChannelEvent(name, timeStamp)
-      devices.filterKeys(_ != name).values foreach (_ ! event)
+      devices.filterKeys(_ != name).values foreach (_.device ! event)
       if( devices.get(name).contains(sender)) {
         context.become(broadcaster(devices - name))
       }
     
     case msg @ SendToDevice(fromDevice, toDevice, message, ts) =>
-      devices.get(toDevice) foreach (_ ! SendToDevice(msg.fromDevice, msg.toDevice, msg.message, timeStamp))
+      devices.get(toDevice) foreach (_.device ! SendToDevice(msg.fromDevice, msg.toDevice, msg.message, timeStamp))
 
     case Fanout(fromDevice, eventId, content, ts) =>
       val event = Fanout(fromDevice, eventId, content, timeStamp)
-      devices.filterKeys(_ != fromDevice).values.foreach(_ forward event)
+      devices.filter(isEventListener(fromDevice, eventId)).values.foreach(_.device forward event)
     
     case GetConnectedDevices =>
       sender ! ConnectedDevices(devices.keys.toList, timeStamp)
@@ -76,5 +78,14 @@ class ChannelActor extends Actor with ActorLogging {
     val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     df.setTimeZone(tz);
     df
+  }
+  
+  def isEventListener(skipDevice: String, event: String): ((String, Subscriber)) => Boolean = { item: (String, Subscriber) =>
+    val (device, sub) = item
+    if(device == skipDevice){
+      false
+    }else{
+      sub.eventPrefixes.filter(event.startsWith(_)).size > 0
+    }
   }
 }

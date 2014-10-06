@@ -48,13 +48,13 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
  
     "refuse connection with wrong channel name" in {
       val wsActor = system.actorOf(ConnectionActor.props(self))
-      wsActor ! ConnectToChannel("", "", "pass")
+      wsActor ! ConnectToChannel("", "", "pass", List())
       expectMsg(AuthorizationError)
     }
  
     "connect to the channel" in {
       val wsActor = system.actorOf(ConnectionActor.props(self))
-      wsActor ! ConnectToChannel("test1", "dev1", "pass1")
+      wsActor ! ConnectToChannel("test1", "dev1", "pass1", List())
       expectMsg(ConnectedEvent)
     }
   }
@@ -64,10 +64,10 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
     "remove its listener from channel on disconnect" in {
       val probe = TestProbe()
       val socket1 = system.actorOf(ConnectionActor.props(probe.ref))
-      probe.send(socket1, ConnectToChannel("test1", "dev1", "pass1"))
+      probe.send(socket1, ConnectToChannel("test1", "dev1", "pass1", List()))
       probe.expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test1")
-      channel ! ChannelActor.RegisterDevice("testDevice")
+      channel ! ChannelActor.RegisterDevice("testDevice", List.empty)
       probe.send(socket1, DisconnectFromChannel)
       fishForMessage() {
         case ChannelActor.LeftChannelEvent("dev1", _) => true
@@ -78,10 +78,10 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
     "remove its listener when stopped" in {
       val probe = TestProbe()
       val socket1 = system.actorOf(ConnectionActor.props(probe.ref))
-      probe.send(socket1, ConnectToChannel("test2", "dev1", "pass1"))
+      probe.send(socket1, ConnectToChannel("test2", "dev1", "pass1", List()))
       probe.expectMsg(ConnectedEvent)
       val channel = system.actorSelection("/user/channel-manager/test2")
-      channel ! ChannelActor.RegisterDevice("testDevice")
+      channel ! ChannelActor.RegisterDevice("testDevice", List.empty)
       system.stop(socket1)
       fishForMessage() {
         case ChannelActor.LeftChannelEvent("dev1", _) => true
@@ -94,8 +94,8 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       val probe2 = TestProbe()
       val socket1 = system.actorOf(ConnectionActor.props(probe1.ref))
       val socket2 = system.actorOf(ConnectionActor.props(probe2.ref))
-      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
-      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1", List("")))
       probe2.expectMsg(ConnectedEvent)
       probe1.send(socket1, SendEvent("event1", "12"))
       probe2.fishForMessage() {
@@ -109,8 +109,8 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       val probe2 = TestProbe()
       val socket1 = system.actorOf(ConnectionActor.props(probe1.ref))
       val socket2 = system.actorOf(ConnectionActor.props(probe2.ref))
-      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
-      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1", List()))
       probe2.expectMsg(ConnectedEvent)
       probe1.send(socket1, SendMessage("probe2", "event1", "12"))
       probe2.fishForMessage() {
@@ -124,8 +124,8 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       val probe2 = TestProbe()
       val socket1 = system.actorOf(ConnectionActor.props(probe1.ref))
       val socket2 = system.actorOf(ConnectionActor.props(probe2.ref))
-      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1"))
-      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1"))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
+      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1", List()))
       probe1.expectMsg(ConnectedEvent)
       probe1.send(socket1, GetDevices)
       probe1.fishForMessage() {

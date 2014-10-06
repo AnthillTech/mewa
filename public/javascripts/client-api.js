@@ -13,7 +13,9 @@
  *   deviceName - name of device. This device needs permission to access channel
  *   password - device password
  */
-function channelConnect(url, channelName, deviceName, password){
+function channelConnect(url, channelName, deviceName, password, listenTo){
+	
+	listenTo = (typeof listenTo === "undefined") ? [] : listenTo;
 	
 	var _connection = {
 		_socket: null,
@@ -80,7 +82,7 @@ function channelConnect(url, channelName, deviceName, password){
 	}
 	
 	function _sendJoinPacket(){
-		msg = {type: "connect", channel:channelName, device:deviceName, password:password};
+		msg = {type: "connect", channel:channelName, device:deviceName, password:password, listenTo: listenTo};
         _connection._sendMsg(msg);
         _connection._socket.onmessage = function(resp){
         	var event = JSON.parse(resp.data);

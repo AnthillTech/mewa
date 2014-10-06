@@ -32,8 +32,8 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val probe1 = TestProbe()
       val probe2 = TestProbe()
       val channel = system.actorOf(Props[ChannelActor])
-      probe1.send(channel, RegisterDevice("probe1"))
-      probe2.send(channel, RegisterDevice("probe2"))
+      probe1.send(channel, RegisterDevice("probe1", List.empty))
+      probe2.send(channel, RegisterDevice("probe2", List.empty))
       probe1.expectMsgType[JoinedChannelEvent]
     }
  
@@ -41,8 +41,8 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val probe1 = TestProbe()
       val probe2 = TestProbe()
       val channel = system.actorOf(Props[ChannelActor])
-      probe1.send(channel, RegisterDevice("probe1"))
-      probe2.send(channel, RegisterDevice("probe2"))
+      probe1.send(channel, RegisterDevice("probe1", List.empty))
+      probe2.send(channel, RegisterDevice("probe2", List.empty))
       probe1.expectMsgType[JoinedChannelEvent]
       probe2.send(channel, UnRegisterDevice("probe2"))
       probe1.expectMsgType[LeftChannelEvent]
@@ -52,20 +52,20 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val probe1 = TestProbe()
       val probe2 = TestProbe()
       val channel = system.actorOf(Props[ChannelActor])
-      probe1.send(channel, RegisterDevice("probe1"))
-      probe2.send(channel, RegisterDevice("probe2"))
+      probe1.send(channel, RegisterDevice("probe1", List.empty))
+      probe2.send(channel, RegisterDevice("probe2", List.empty))
       probe1.expectMsgType[JoinedChannelEvent]
       val msg = SendToDevice("probe1", "probe2", "msg", "")
       probe1.send(channel, msg)
       probe2.expectMsgType[SendToDevice]
     }
  
-    "fan-out message " in {
+    "fan-out event " in {
       val probe1 = TestProbe()
       val probe2 = TestProbe()
       val channel = system.actorOf(Props[ChannelActor])
-      probe1.send(channel, RegisterDevice("probe1"))
-      probe2.send(channel, RegisterDevice("probe2"))
+      probe1.send(channel, RegisterDevice("probe1", List.empty))
+      probe2.send(channel, RegisterDevice("probe2", List("msg")))
       probe1.expectMsgType[JoinedChannelEvent]
       val msg = Fanout("probe1", "msg", "content", "")
       probe1.send(channel, msg)
@@ -76,8 +76,8 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       val probe1 = TestProbe()
       val probe2 = TestProbe()
       val channel = system.actorOf(Props[ChannelActor])
-      probe1.send(channel, RegisterDevice("probe1"))
-      probe2.send(channel, RegisterDevice("probe2"))
+      probe1.send(channel, RegisterDevice("probe1", List.empty))
+      probe2.send(channel, RegisterDevice("probe2", List.empty))
       probe1.expectMsgType[JoinedChannelEvent]
       probe1.send(channel, GetConnectedDevices)
       probe1.expectMsgType[ConnectedDevices]

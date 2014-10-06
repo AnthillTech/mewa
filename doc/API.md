@@ -46,12 +46,14 @@ Connects a device to the channel
 { "type" : "connect", 
   "channel" : <fq_channel_name>, 
   "device"  : <dev_name>, 
-  "password": <ch_pwd> }
+  "password": <ch_pwd> 
+  "listenTo": <event_prefixes>}
 ```
 
 `fq_channel_name ::= string` - fully qualified channel name  
 `dev_name ::= string` - device name (must be unique within the channel)  
 `ch_pwd ::= string` - channel access password
+`event_prefixes ::= array of strings` - Subscribe to events which starts with any of the given prefixes
 
 
 If the device successfully connected to the channel it will receive `connected` packet. Other devices will receive `joined-channel` event from the channel announcing the arrival of a new device.

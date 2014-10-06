@@ -36,7 +36,7 @@ class HttpActor(channel: String, password: String, device: String, deviceUrl: St
       manager ! ChannelManagerActor.GetChannel(channel, device, password)
       
     case ChannelManagerActor.ChannelFound(channel) =>
-      channel ! RegisterDevice(device)
+      channel ! RegisterDevice(device, List.empty)
       context.become(receiveConnected(channel))
   }
 

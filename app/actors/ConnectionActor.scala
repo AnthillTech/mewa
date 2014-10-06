@@ -35,7 +35,8 @@ object ConnectionActor {
       case msg: ConnectToChannel => Json.obj( "type" -> "connect" 
                                             , "channel" -> msg.channel 
                                             , "device" -> msg.device
-                                            , "password" -> msg.password )
+                                            , "password" -> msg.password
+                                            , "listenTo" -> msg.listenTo)
       case DisconnectFromChannel => Json.obj("type" -> "disconnect")
       case AlreadyConnectedError => Json.obj("type" -> "already-connected-error")
       case AuthorizationError => Json.obj("type" -> "authorization-error")
@@ -85,7 +86,8 @@ object ConnectionActor {
     val channel = (jsval \ "channel").as[String]
     val device : String= (jsval \ "device").as[String]
     val password : String= (jsval \ "password").as[String]
-    JsSuccess(ConnectToChannel(channel, device, password))
+    val listenTo = (jsval \ "listenTo").asOpt[List[String]].getOrElse(List())
+    JsSuccess(ConnectToChannel(channel, device, password, listenTo))
   }
 
   def joinedChannelFromJson(jsval:JsValue): JsResult[DeviceJoinedChannel] = { 
@@ -151,19 +153,19 @@ class ConnectionActor(socket: ActorRef) extends Actor{
     case SendMessage(_,_,_) =>
       socket ! NotConnectedError
     
-    case ConnectToChannel(channel, device, password) =>
+    case ConnectToChannel(channel, device, password, listenTo) =>
       Logger.debug("Connecting device " + device + " to channel " + channel)
       val manager = context.actorSelection("/user/channel-manager")
       manager ! ChannelManagerActor.GetChannel(channel, device, password)
       socketName = device
-      context.become(connecting())
+      context.become(connecting(listenTo))
   }
 
   /** Trying to connect */
-  def connecting(): Actor.Receive = {
+  def connecting(listenTo: List[String]): Actor.Receive = {
     
     case ChannelManagerActor.ChannelFound(channel) =>
-      channel ! ChannelActor.RegisterDevice(socketName)
+      channel ! ChannelActor.RegisterDevice(socketName, listenTo)
       socket ! ConnectedEvent
       connectedChannel = Some(channel)
       context.become(connected(channel))
