@@ -152,9 +152,11 @@ Packet used by the device to notify all other devices connected to the channel a
 ```json
 { "type": "send-event", 
   "id": <fq_event_id>, 
+  "ack": <acknowledge>, 
   "params":<params>}
 ```
 `fq_event_id ::= string` - fully qualified event identifier *see service reference for definitions*  
+`acknowledge ::= bool` - if true then server will send Ack packet to acknowledge that it received event
 `params ::= string` - parameters of the event 
 
 
@@ -174,6 +176,16 @@ Packet received by the device when another device sends out an event notificatio
 `from_device ::= string` - the name of the device that has sent the event message  
 `fq_event_id ::= string` - fully qualified event identifier *see service reference for definitions*  
 `params ::= string` - parameters of the event 
+
+
+### Acknowledge
+Confirms that packet was received and processed by server
+**from:** the channel  
+**to:**   the device  
+```json
+{"type": "ack"}
+```
+
 
 
 ### Send message

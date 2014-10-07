@@ -265,17 +265,17 @@ class SendEventSpec extends Specification {
 
   "SendEvent message" should {
     
-    val expected = """{"type": "send-event", "id": "eventId", "params":"params1"}
+    val expected = """{"type": "send-event", "id": "eventId", "params":"params1", "ack":false}
 									 """.replaceAll("\\s+", "")
     
     "serialize to json" in {
-      val msg :MewaMessage = SendEvent("eventId", "params1")
+      val msg :MewaMessage = SendEvent("eventId", "params1", false)
       val jsvalue = Json.toJson(msg).toString() 
       jsvalue must beEqualTo(expected)
     }
 
     "deserialize from json" in {
-      val msg = SendEvent("eventId", "params1")
+      val msg = SendEvent("eventId", "params1", false)
       assertFromJson(msg)
     }
   }
@@ -397,6 +397,29 @@ class DevicesEventSpec extends Specification {
 
     "deserialize from json" in {
       val msg = DevicesEvent("", List("device1", "device2"))
+      assertFromJson(msg)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class AckSpec extends Specification {
+
+  import MewaMessageJsonSpec._
+
+  "Ack message" should {
+    
+    val expected = """{"type":"ack"}"""
+    
+    "serialize to json" in {
+      val msg : MewaMessage = Ack
+      val jsvalue = Json.toJson(msg).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      val msg = Ack
       assertFromJson(msg)
     }
   }

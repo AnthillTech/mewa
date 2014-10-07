@@ -28,12 +28,15 @@ function channelConnect(url, channelName, deviceName, password, listenTo){
 		/** Device left */
 		onDeviceLeftChannel: function(name) {},
 		/** send event to all devices */
-		sendEvent: function(eventId, params) {
-			msg = {type: "send-event", id: eventId, params: params}
+		sendEvent: function(eventId, params, ack) {
+			ack= (typeof ack === "undefined") ? false : ack;
+			msg = {type: "send-event", id: eventId, params: params, ack: ack}
 	        _connection._sendMsg(msg);
 		},
 		/** Received event */
 		onEvent: function(device, eventId, params) {},
+		/** Received ack */
+		onAck: function() {},
 		/** send event to all devices */
 		sendMessage: function(device, msgId, params) {
 			msg = {type: "send-message", device: device, id: msgId, params: params}
@@ -112,6 +115,9 @@ function channelConnect(url, channelName, deviceName, password, listenTo){
 		}
 		else if(packet.type == "devices-event"){
 			_connection.onDevicesEvent(packet.devices, packet.time);
+		}
+		else if(packet.type == "ack"){
+			_connection.onAck();
 		}
 	}
 	

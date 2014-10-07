@@ -39,7 +39,7 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
  
     "not be connected to the channel" in {
       val wsActor = system.actorOf(ConnectionActor.props(self))
-      wsActor ! SendEvent("eventId", "params") 
+      wsActor ! SendEvent("eventId", "params", false) 
       expectMsg(NotConnectedError)
     }
   }
@@ -97,9 +97,21 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
       probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
       probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1", List("")))
       probe2.expectMsg(ConnectedEvent)
-      probe1.send(socket1, SendEvent("event1", "12"))
+      probe1.send(socket1, SendEvent("event1", "12", false))
       probe2.fishForMessage() {
         case Event(_, "probe1", "event1", "12") => true
+        case m => false
+      }
+    }
+ 
+    "ack event" in {
+      val probe1 = TestProbe()
+      val socket1 = system.actorOf(ConnectionActor.props(probe1.ref))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
+      probe1.expectMsg(ConnectedEvent)
+      probe1.send(socket1, SendEvent("event1", "12", true))
+      probe1.fishForMessage() {
+        case Ack => true
         case m => false
       }
     }

@@ -47,10 +47,11 @@ object ConnectionActor {
       case msg:DeviceJoinedChannel => Json.obj("type" -> "joined-channel", "time" -> msg.timeStamp, "device" -> msg.device)                                                                                                                        
       case msg:DeviceLeftChannel => Json.obj("type" -> "left-channel", "time" -> msg.timeStamp, "device" -> msg.device)                                                                                                                        
 
-      case msg: SendEvent => Json.obj( "type" -> "send-event", "id" -> msg.eventId, "params" ->msg.params )
+      case msg: SendEvent => Json.obj( "type" -> "send-event", "id" -> msg.eventId, "params" -> msg.params, "ack" -> msg.ack )
       case msg: Event => Json.obj( "type" -> "event", "time" -> msg.timeStamp, "device" -> msg.fromDevice, "id" -> msg.eventId, "params" ->msg.params )
       case msg: SendMessage => Json.obj( "type" -> "send-message", "device" -> msg.targetDevice, "id" -> msg.messageId, "params" ->msg.params )
       case msg: Message => Json.obj( "type" -> "message", "time" -> msg.timeStamp, "device" -> msg.fromDevice, "id" -> msg.messageId, "params" ->msg.params )
+      case Ack => Json.obj("type" -> "ack")
 
       case GetDevices => Json.obj("type" -> "get-devices")
       case msg:DevicesEvent => Json.obj("type" -> "devices-event", "time" -> msg.timeStamp, "devices" -> msg.names)                                                                                                                        
@@ -75,6 +76,7 @@ object ConnectionActor {
       case "event" => eventFromJson(jsval)
       case "send-message" => sendMessageFromJson(jsval)
       case "message" => messageFromJson(jsval)
+      case "ack" => JsSuccess(Ack)
       
       case "get-devices" => JsSuccess(GetDevices)
       case "devices-event" => devicesEventFromJson(jsval)
@@ -103,7 +105,8 @@ object ConnectionActor {
   def sendEventFromJson(jsval:JsValue): JsResult[SendEvent] = { 
     val eventId = (jsval \ "id").as[String]
     val params : String= (jsval \ "params").as[String]
-    JsSuccess(SendEvent(eventId, params))
+    val ack = (jsval \ "ack").asOpt[Boolean].getOrElse(false)
+    JsSuccess(SendEvent(eventId, params, ack))
   }
 
   def eventFromJson(jsval:JsValue): JsResult[Event] = { 
@@ -147,7 +150,7 @@ class ConnectionActor(socket: ActorRef) extends Actor{
   /** Disconnected from channel */
   def disconnected: Actor.Receive = {
     
-    case SendEvent(_,_) =>
+    case SendEvent(_,_,_) =>
       socket ! NotConnectedError
     
     case SendMessage(_,_,_) =>
@@ -178,8 +181,9 @@ class ConnectionActor(socket: ActorRef) extends Actor{
   /** Process messages while connected to the channel */
   def connected(channel: ActorRef): Actor.Receive = {
     
-    case SendEvent(eventId, value) =>
+    case SendEvent(eventId, value, ack) =>
       channel ! ChannelActor.Fanout(socketName, eventId, value, "")
+      if(ack) sender ! Ack
 
     case ChannelActor.Fanout(from, eventId, value, ts) =>
       socket ! Event(ts, from, eventId, value)

@@ -89,6 +89,10 @@
             message(ts + ": Received event <b>" + eventId + "</b> with params: <b>" + params + "</b>");
         }
         
+        connection.onAck = function(){
+            message("Event acknowledged by server");
+        }
+        
         connection.onMessage = function(device, msgId, params, ts){
             if(msgId == "org.fi24.image.Image"){
                 messageImage(JSON.parse(params).data)                   
@@ -119,7 +123,7 @@
       $("#sendEventBtn").click(function(event) {
     	  var eventId = $("#eventName").val();
     	  var params = $("#eventParams").val();
-    	  connection.sendEvent(eventId, params);
+    	  connection.sendEvent(eventId, params, true);
       });
       
       $("#sendMessageBtn").click(function(event) {
