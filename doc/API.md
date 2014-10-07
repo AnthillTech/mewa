@@ -46,7 +46,7 @@ Connects a device to the channel
 { "type" : "connect", 
   "channel" : <fq_channel_name>, 
   "device"  : <dev_name>, 
-  "password": <ch_pwd> 
+  "password": <ch_pwd>, 
   "listenTo": <event_prefixes>}
 ```
 
