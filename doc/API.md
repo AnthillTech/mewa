@@ -1,4 +1,4 @@
-# Channel API spec v.0.5
+# Channel API spec v.0.6
 
 *This protocol is still under development. It means that it can change in the future in this way, that it will break backward compatibility*
 
@@ -250,4 +250,4 @@ Packet recived by the device, containing the list of names of all other devices 
 `deviceA, deviceB, deviceN ::= string` - names of devices connected to the channel
 
 
-*document rev 0.5*
+*document rev 0.6*
