@@ -36,7 +36,7 @@ object ConnectionActor {
                                             , "channel" -> msg.channel 
                                             , "device" -> msg.device
                                             , "password" -> msg.password
-                                            , "listenTo" -> msg.listenTo)
+                                            , "subscribe" -> msg.subscribe)
       case DisconnectFromChannel => Json.obj("type" -> "disconnect")
       case AlreadyConnectedError => Json.obj("type" -> "already-connected-error")
       case AuthorizationError => Json.obj("type" -> "authorization-error")
@@ -88,8 +88,8 @@ object ConnectionActor {
     val channel = (jsval \ "channel").as[String]
     val device : String= (jsval \ "device").as[String]
     val password : String= (jsval \ "password").as[String]
-    val listenTo = (jsval \ "listenTo").asOpt[List[String]].getOrElse(List())
-    JsSuccess(ConnectToChannel(channel, device, password, listenTo))
+    val subscribe = (jsval \ "subscribe").asOpt[List[String]].getOrElse(List())
+    JsSuccess(ConnectToChannel(channel, device, password, subscribe))
   }
 
   def joinedChannelFromJson(jsval:JsValue): JsResult[DeviceJoinedChannel] = { 

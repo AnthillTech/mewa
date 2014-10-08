@@ -57,7 +57,7 @@ class ConnectMessage2Spec extends Specification {
 												"channel":"name",
 												"device":"device1",
 												"password":"pass",
-												"listenTo": ["ala", "ola"] }
+												"subscribe": ["ala", "ola"] }
 									 """
     
     "serialize to json" in {

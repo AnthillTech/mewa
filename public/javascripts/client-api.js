@@ -85,7 +85,7 @@ function channelConnect(url, channelName, deviceName, password, listenTo){
 	}
 	
 	function _sendJoinPacket(){
-		msg = {type: "connect", channel:channelName, device:deviceName, password:password, listenTo: listenTo};
+		msg = {type: "connect", channel:channelName, device:deviceName, password:password, subscribe: listenTo};
         _connection._sendMsg(msg);
         _connection._socket.onmessage = function(resp){
         	var event = JSON.parse(resp.data);
