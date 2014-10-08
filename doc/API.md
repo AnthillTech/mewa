@@ -1,4 +1,4 @@
-# Channel API spec v.0.6
+# Channel API spec v.0.7
 
 *This protocol is still under development. It means that it can change in the future in this way, that it will break backward compatibility*
 
@@ -44,17 +44,41 @@ Connects a device to the channel
 
 ```json
 { "type" : "connect", 
-  "channel" : <fq_channel_name>, 
-  "device"  : <dev_name>, 
-  "password": <ch_pwd>, 
-  "listenTo": <event_prefixes>}
+  "channel"   : <fq_channel_name>, 
+  "device"    : <dev_name>, 
+  "password"  : <ch_pwd>, 
+  "subscribe" : [ {<event_prefix>,} ]
 ```
 
 `fq_channel_name ::= string` - fully qualified channel name  
 `dev_name ::= string` - device name (must be unique within the channel)  
-`ch_pwd ::= string` - channel access password
-`event_prefixes ::= array of strings` - Subscribe to events which starts with any of the given prefixes
+`ch_pwd ::= string` - channel access password  
+`event_prefix ::= string` - channel will deliver events that start with the given string  
 
+The field `subscribe` is optional and is used by the device to specify what events it wants to receive from the channel. The channel will try to match an event's URI against each of the prefix strings specified in this field to decide whether to deliver the event to this device or not. If the list is empty or the `subscribe` field is missing no events will be sent to the device by the channel. On the other hand to receive all possible events, the list should contain only one empty string (i.e. should be this: `[ '' ]`)  
+
+*Examples:*  
+
+prefix: `org.fi24.light`  
+event:  `org.fi24.light.TurnedOn`  
+result: match  
+  
+prefix: `org.fi24.light`  
+event:  `org.fi24.switch.SwitchedOn`  
+result: no match  
+  
+prefix: `org.fi24`  
+event:  `org.fi24.switch.SwitchedOn`  
+result: match  
+  
+prefix: `org.fi`  
+event:  `org.fi24.switch.SwitchedOn`  
+result: match  (matching is performed character by character, so the prefix need not end on the dot boundary)  
+
+
+
+Event subscription is a new feature introduced in version 0.7 of the channel API specification.  
+**NOTE: it breaks backward compatibility with prior specification.** Devices using `connect` packet as specified in specs prior to 0.7 will no longer receive any events from the channel due to missing `subscribe` field  
 
 If the device successfully connected to the channel it will receive `connected` packet. Other devices will receive `joined-channel` event from the channel announcing the arrival of a new device.
 Alternatively the device may receive one of the following error packets: `already-connected-error`, `authorization-error`
@@ -156,8 +180,10 @@ Packet used by the device to notify all other devices connected to the channel a
   "params":<params>}
 ```
 `fq_event_id ::= string` - fully qualified event identifier *see service reference for definitions*  
-`acknowledge ::= bool` - if true then server will send Ack packet to acknowledge that it received event
-`params ::= string` - parameters of the event 
+`acknowledge ::= true | false` - if true then server will send Ack packet to acknowledge that it received event
+`params ::= string` - parameters of the event  
+  
+For backward compatibility the `ack` field is optional. If it is missing, the event will not be acknowledged
 
 
 ### Event
@@ -179,7 +205,7 @@ Packet received by the device when another device sends out an event notificatio
 
 
 ### Acknowledge
-Confirms that packet was received and processed by server
+Confirms that packet was received by the channel. It does not however indicate that it was delivered to any recipient
 **from:** the channel  
 **to:**   the device  
 ```json
@@ -250,4 +276,4 @@ Packet recived by the device, containing the list of names of all other devices 
 `deviceA, deviceB, deviceN ::= string` - names of devices connected to the channel
 
 
-*document rev 0.6*
+*document rev 0.7*
