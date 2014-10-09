@@ -52,9 +52,7 @@ class ChannelActor extends Actor with ActorLogging {
     case UnRegisterDevice(name) => 
       val event = LeftChannelEvent(name, timeStamp)
       devices.filterKeys(_ != name).values foreach (_.device ! event)
-      if( devices.get(name).contains(sender)) {
-        context.become(broadcaster(devices - name))
-      }
+      context.become(broadcaster(devices - name))
     
     case msg @ SendToDevice(fromDevice, toDevice, message, ts) =>
       devices.get(toDevice) foreach (_.device ! SendToDevice(msg.fromDevice, msg.toDevice, msg.message, timeStamp))
