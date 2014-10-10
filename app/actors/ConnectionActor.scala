@@ -210,8 +210,8 @@ class ConnectionActor(socket: ActorRef) extends Actor{
       Logger.debug("Disonnecting device " + socketName)
       channel ! ChannelActor.UnRegisterDevice(socketName)
       connectedChannel = None
-      context.become(disconnected)
       socket ! DisconnectedEvent
+      context.become(disconnected)
   }
   
   def receive = disconnected
