@@ -67,9 +67,9 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       probe1.send(channel, RegisterDevice("probe1", List.empty))
       probe2.send(channel, RegisterDevice("probe2", List("msg")))
       probe1.expectMsgType[JoinedChannelEvent]
-      val msg = Fanout("probe1", "msg", "content", "")
+      val msg = Event("probe1", "msg", "content", "")
       probe1.send(channel, msg)
-      probe2.expectMsgType[Fanout]
+      probe2.expectMsgType[Event]
     }
  
     "return list of all connected devices" in {
@@ -81,6 +81,20 @@ class ChannelSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSe
       probe1.expectMsgType[JoinedChannelEvent]
       probe1.send(channel, GetConnectedDevices)
       probe1.expectMsgType[ConnectedDevices]
+    }
+ 
+    "remember last event" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val channel = system.actorOf(Props[ChannelActor])
+      probe1.send(channel, RegisterDevice("probe1", List.empty))
+      probe2.send(channel, RegisterDevice("probe2", List("msg")))
+      probe1.expectMsgType[JoinedChannelEvent]
+      val msg = Event("probe1", "msg", "content", "")
+      probe1.send(channel, msg)
+      probe2.expectMsgType[Event]
+      probe2.send(channel, GetLastEvents("", ""))
+      probe2.expectMsgType[LastEvents]
     }
   }
 }

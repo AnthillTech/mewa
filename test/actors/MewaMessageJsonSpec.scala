@@ -424,3 +424,53 @@ class AckSpec extends Specification {
     }
   }
 }
+
+
+@RunWith(classOf[JUnitRunner])
+class GetLastEventSpec extends Specification {
+
+  import MewaMessageJsonSpec._
+
+  "GetLastEvents message" should {
+    
+    val expected = """{ "type":"get-last-events", 
+												"device": "deviceA",
+												"prefix": "org.fi24.image" }
+									 """.replaceAll("\\s+", "")
+    val packet : MewaMessage = GetLastEvents("deviceA", "org.fi24.image")
+    
+    "serialize to json" in {
+      val jsvalue = Json.toJson(packet).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      assertFromJson(packet)
+    }
+  }
+}
+
+
+@RunWith(classOf[JUnitRunner])
+class LastEventSpec extends Specification {
+
+  import MewaMessageJsonSpec._
+
+  "LastEvents message" should {
+    
+    val expected = """{ "type":"last-events", 
+												"time": "",
+												"events": [{"device": "deviceA", "id": "abc", "params": "12", "time": ""}] }
+									 """.replaceAll("\\s+", "")
+    val packet : MewaMessage = LastEvents("", List(Event("", "deviceA", "abc", "12")))
+    
+    "serialize to json" in {
+      val jsvalue = Json.toJson(packet).toString() 
+      jsvalue must beEqualTo(expected)
+    }
+
+    "deserialize from json" in {
+      assertFromJson(packet)
+    }
+  }
+}

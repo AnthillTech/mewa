@@ -38,6 +38,11 @@ object Protocol {
   /** Device left channel event */
   case class DeviceLeftChannel(timeStamp: String, device: String) extends MewaMessage
   
+  /** Ask for list of all connect to the channel devices. */
+  case object GetDevices extends MewaMessage
+  /** Event with list of all connected devices */
+  case class DevicesEvent(timeStamp: String, names: Seq[String]) extends MewaMessage
+  
   /** Send event to the channel */
   case class SendEvent(eventId: String, params: String, ack: Boolean) extends MewaMessage
   /** Notify client about new event send by other clients to the connected channel */
@@ -49,9 +54,9 @@ object Protocol {
   /** Acknowledge that server received event or message */
   case object Ack extends MewaMessage  
   
-  /** Ask for list of all connect to the channel devices. */
-  case object GetDevices extends MewaMessage
+  /** Ask for last events */
+  case class GetLastEvents(dvice: String, eventPrefix: String) extends MewaMessage
   /** Event with list of all connected devices */
-  case class DevicesEvent(timeStamp: String, names: Seq[String]) extends MewaMessage
+  case class LastEvents(timeStamp: String, events: List[Event]) extends MewaMessage
 
 }

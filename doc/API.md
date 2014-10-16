@@ -1,4 +1,4 @@
-# Channel API spec v.0.7
+# Channel API spec v.0.8
 
 *This protocol is still under development. It means that it can change in the future in this way, that it will break backward compatibility*
 
@@ -249,7 +249,7 @@ Packet received by the device when another device sends a message addressed to i
 
 
 
-## Device Discovery
+## Discovery
 
 ### GetDevices
 Packet used by the device to find out about the names of all other devices connected to the channel  
@@ -276,4 +276,45 @@ Packet recived by the device, containing the list of names of all other devices 
 `deviceA, deviceB, deviceN ::= string` - names of devices connected to the channel
 
 
-*document rev 0.7*
+### Get last events
+Packet used to get infromation last events send to the channel
+**from:** the device  
+**to:** the channel  
+
+```json
+{ "type":"get-last-events", 
+   "device": <device_name>,
+   "prefix": <event_prefix> }
+```
+`device ::= string` - Ask for events send by this device. If empty return events from all devices.
+`prefix ::= string` - prefix for device id
+
+
+### Last event
+Packet recived by the device, containing the list of last send events. 
+Sent by the channel in response to the **get-last-events** packet  
+**from:** the channel  
+**to:** the device  
+
+```json
+{ "type": "last-events", 
+  "time": <timestamp>,
+  "events": <events>
+}
+
+{"device": "deviceA", "id": "abc", "params": "12", "time": ""}
+```
+`timestamp` - ISO 8601 time when packed was processed in the channel
+`events ::= list of <event_data>` - last events 
+
+**Event data**
+```json
+{ "device": <device_name>, 
+  "id": <event_id>, 
+  "params": <event_params>, 
+  "time": <timestamp>}
+```
+
+
+
+*document rev 0.8*

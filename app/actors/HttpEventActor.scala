@@ -36,7 +36,7 @@ class HttpEventActor(channel: String, password: String, device: String) extends 
   def receiveEvent(id: String, content: String): Actor.Receive = {
     
     case ChannelManagerActor.ChannelFound(channel) =>
-      channel ! ChannelActor.Fanout(device, id, content, "")
+      channel ! ChannelActor.Event(device, id, content, "")
       self ! PoisonPill
     
     case _ => self ! PoisonPill

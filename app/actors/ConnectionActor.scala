@@ -47,15 +47,23 @@ object ConnectionActor {
       case msg:DeviceJoinedChannel => Json.obj("type" -> "joined-channel", "time" -> msg.timeStamp, "device" -> msg.device)                                                                                                                        
       case msg:DeviceLeftChannel => Json.obj("type" -> "left-channel", "time" -> msg.timeStamp, "device" -> msg.device)                                                                                                                        
 
+      case GetDevices => Json.obj("type" -> "get-devices")
+      case msg:DevicesEvent => Json.obj("type" -> "devices-event", "time" -> msg.timeStamp, "devices" -> msg.names)                                                                                                                        
+
       case msg: SendEvent => Json.obj( "type" -> "send-event", "id" -> msg.eventId, "params" -> msg.params, "ack" -> msg.ack )
       case msg: Event => Json.obj( "type" -> "event", "time" -> msg.timeStamp, "device" -> msg.fromDevice, "id" -> msg.eventId, "params" ->msg.params )
       case msg: SendMessage => Json.obj( "type" -> "send-message", "device" -> msg.targetDevice, "id" -> msg.messageId, "params" ->msg.params )
       case msg: Message => Json.obj( "type" -> "message", "time" -> msg.timeStamp, "device" -> msg.fromDevice, "id" -> msg.messageId, "params" ->msg.params )
       case Ack => Json.obj("type" -> "ack")
 
-      case GetDevices => Json.obj("type" -> "get-devices")
-      case msg:DevicesEvent => Json.obj("type" -> "devices-event", "time" -> msg.timeStamp, "devices" -> msg.names)                                                                                                                        
-  }
+      case GetLastEvents(device, prefix) => Json.obj("type" -> "get-last-events", "device" -> device, "prefix" -> prefix)
+      case msg: LastEvents => Json.obj( "type" -> "last-events"
+                                      , "time" -> msg.timeStamp
+                                      , "events" -> msg.events.map {e => Json.obj( "device" -> e.fromDevice
+                                                                                 , "id" -> e.eventId
+                                                                                 , "params" -> e.params
+                                                                                 , "time" -> e.timeStamp)} )                                                                                                                        
+}
 
   /**
    * Create message from JSON
@@ -80,6 +88,8 @@ object ConnectionActor {
       
       case "get-devices" => JsSuccess(GetDevices)
       case "devices-event" => devicesEventFromJson(jsval)
+      case "get-last-events" => getLastEventsFromJson(jsval)
+      case "last-events" => lastEventsFromJson(jsval)
       case other => JsError("Unknown client message: <" + other + ">")
     }
   }
@@ -110,21 +120,21 @@ object ConnectionActor {
   }
 
   def eventFromJson(jsval:JsValue): JsResult[Event] = { 
-    val device : String= (jsval \ "device").as[String]
+    val device = (jsval \ "device").as[String]
     val eventId = (jsval \ "id").as[String]
     val params : String= (jsval \ "params").as[String]
     JsSuccess(Event("", device, eventId, params))
   }
 
   def sendMessageFromJson(jsval:JsValue): JsResult[SendMessage] = { 
-    val device : String= (jsval \ "device").as[String]
+    val device = (jsval \ "device").as[String]
     val msgId = (jsval \ "id").as[String]
     val params : String= (jsval \ "params").as[String]
     JsSuccess(SendMessage(device, msgId, params))
   }
 
   def messageFromJson(jsval:JsValue): JsResult[Message] = { 
-    val device : String= (jsval \ "device").as[String]
+    val device = (jsval \ "device").as[String]
     val msgId = (jsval \ "id").as[String]
     val params : String= (jsval \ "params").as[String]
     JsSuccess(Message("", device, msgId, params))
@@ -133,6 +143,19 @@ object ConnectionActor {
   def devicesEventFromJson(jsval:JsValue): JsResult[DevicesEvent] = { 
     val deviceNames = (jsval \ "devices").as[List[String]]
     JsSuccess(DevicesEvent("", deviceNames))
+  }
+
+  def getLastEventsFromJson(jsval:JsValue): JsResult[GetLastEvents] = { 
+    val device = (jsval \ "device").as[String]
+    val prefix = (jsval \ "prefix").as[String]
+    JsSuccess(GetLastEvents(device, prefix))
+  }
+
+  def lastEventsFromJson(jsval:JsValue): JsResult[LastEvents] = {
+    val events: List[Event] = (jsval \ "events").as[List[JsValue]].map {v => 
+      eventFromJson(v).getOrElse(Event("", "", "", ""))
+    }
+    JsSuccess(LastEvents("", events))
   }
 }
 
@@ -182,10 +205,10 @@ class ConnectionActor(socket: ActorRef) extends Actor{
   def connected(channel: ActorRef): Actor.Receive = {
     
     case SendEvent(eventId, value, ack) =>
-      channel ! ChannelActor.Fanout(socketName, eventId, value, "")
+      channel ! ChannelActor.Event(socketName, eventId, value, "")
       if(ack) sender ! Ack
 
-    case ChannelActor.Fanout(from, eventId, value, ts) =>
+    case ChannelActor.Event(from, eventId, value, ts) =>
       socket ! Event(ts, from, eventId, value)
       
     case msg @ SendMessage(targetDevice, messageId, params) =>
@@ -199,6 +222,12 @@ class ConnectionActor(socket: ActorRef) extends Actor{
       
     case ChannelActor.ConnectedDevices(devices, ts) =>
       socket ! DevicesEvent(ts, devices)
+      
+    case GetLastEvents(device, prefix) =>
+      channel ! ChannelActor.GetLastEvents(device, prefix)
+      
+    case ChannelActor.LastEvents(events, ts) =>
+      socket ! LastEvents(ts, events.map {e => Event(e.timestamp, e.fromDevice, e.eventId, e.content)})
       
     case ChannelActor.JoinedChannelEvent(deviceName, ts) =>
       socket ! DeviceJoinedChannel(ts, deviceName)

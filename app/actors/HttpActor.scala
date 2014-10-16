@@ -1,5 +1,6 @@
 package actors
 
+
 import akka.actor.{Actor, ActorRef, ActorLogging, Props}
 import play.api.mvc.WebSocket.FrameFormatter
 import play.api.libs.json.{__, Format, Writes, Reads, Json, JsError}
@@ -10,7 +11,7 @@ import cc.mewa.channels.ChannelActor
 import cc.mewa.api.Protocol._
 import akka.actor.PoisonPill
 import cc.mewa.channels.ChannelActor.{RegisterDevice, UnRegisterDevice}
-import cc.mewa.channels.ChannelActor.{Fanout, SendToDevice}
+import cc.mewa.channels.ChannelActor.{Event, SendToDevice}
 import dispatch._, Defaults._
 
 
@@ -49,7 +50,7 @@ class HttpActor(channel: String, password: String, device: String, deviceUrl: St
     case ChannelActor.SendToDevice(from, toDevice, msg @ SendMessage(device, msgId, params), ts) =>
       sendMessage(from, msgId, params)
 
-    case Fanout(fromDevice, eventId, content, ts) =>
+    case Event(fromDevice, eventId, content, ts) =>
       sendEvent(fromDevice, eventId, content)
   }
 
