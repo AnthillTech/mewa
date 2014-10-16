@@ -17,9 +17,9 @@
     <div class="panel">
         <span class="panelHeader">Send event:</span>
         <span>eventID</span>
-        <input id="eventName" type="text" value=""/>
+        <input id="eventName" type="text" value="org.f24.dummy"/>
         <span>params</span>
-        <input id="eventParams" type="text" value="level"/>
+        <input id="eventParams" type="text" value="12"/>
         <button id="sendEventBtn">Send</button>
     </div>
     <div class="panel">
@@ -35,6 +35,7 @@
     <div class="panel">
         <span class="panelHeader">Actions:</span>
         <button id="getDevices">Get connected devices</button>
+        <button id="getLastEvents">Get last events</button>
         <button id="clear">Clear log</button>
     </div>
     
@@ -107,6 +108,14 @@
         		message(devices[i]);
         	}
         }
+
+        connection.onLastEvents = function(events){
+            message("Last events:");
+            for(var i in events){
+            	var e = events[i]
+                message("- device: " + e.device + " event: " + e.id + " params: " + e.params)
+            }
+        }
    
         return connection;
       }
@@ -135,6 +144,10 @@
 
       $('#getDevices').click(function(){
           connection.getDevices();
+      });
+
+      $('#getLastEvents').click(function(){
+          connection.getLastEvents();
       });
       
       

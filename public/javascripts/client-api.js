@@ -51,6 +51,14 @@ function channelConnect(url, channelName, deviceName, password, listenTo){
 		},
 		/** Received set property command */
 		onDevicesEvent: function(devices) {},
+		/** Get last events */
+		getLastEvents: function() {
+			msg = {type: "get-last-events", device: "", prefix: ""}
+	        _connection._sendMsg(msg);
+		},
+		/** Received set property command */
+		onLastEvents: function(events) {},
+
 		_sendMsg: function(msg){
 	        try{
 	            json = JSON.stringify(msg);
@@ -115,6 +123,9 @@ function channelConnect(url, channelName, deviceName, password, listenTo){
 		}
 		else if(packet.type == "devices-event"){
 			_connection.onDevicesEvent(packet.devices, packet.time);
+		}
+		else if(packet.type == "last-events"){
+			_connection.onLastEvents(packet.events, packet.time);
 		}
 		else if(packet.type == "ack"){
 			_connection.onAck();
