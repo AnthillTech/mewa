@@ -1,4 +1,4 @@
-package actors
+package cc.mewa.api
 
 import org.specs2.mutable._
 import org.specs2.runner._
@@ -8,10 +8,10 @@ import play.api.test._
 import play.api.test.Helpers._
 import play.api.libs.json.JsSuccess
 import cc.mewa.api.Protocol._
-import actors.ConnectionActor._
+import cc.mewa.api.ProtocolJson._
 
 
-object MewaMessageJsonSpec extends Specification{
+object ProtocolJsonSpec extends Specification{
   
   /*
    * Convert to json
@@ -29,7 +29,7 @@ object MewaMessageJsonSpec extends Specification{
 @RunWith(classOf[JUnitRunner])
 class ConnectMessage1Spec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "Connect message ver 1" should {
     
@@ -49,7 +49,7 @@ class ConnectMessage1Spec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class ConnectMessage2Spec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "Connect message ver 2" should {
     
@@ -77,7 +77,7 @@ class ConnectMessage2Spec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class DisconnectMessageSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "Disconnect message" should {
     
@@ -101,7 +101,7 @@ class DisconnectMessageSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class ConnectedEventSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "ConnectedEvent message" should {
     
@@ -124,7 +124,7 @@ class ConnectedEventSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class AlreadyConnectedErrorSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "AlreadyConnectedError message" should {
     
@@ -147,7 +147,7 @@ class AlreadyConnectedErrorSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class AuthorizationErrorSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "AuthorizationError message" should {
     
@@ -170,7 +170,7 @@ class AuthorizationErrorSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class NotConnectedErrorSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "NotConnectedError message" should {
     
@@ -192,7 +192,7 @@ class NotConnectedErrorSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class DisconnectedEventSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "DisconnectedEvent message" should {
     
@@ -215,7 +215,7 @@ class DisconnectedEventSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class DeviceJonedChannelSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "DeviceJonedChannel message" should {
     
@@ -238,7 +238,7 @@ class DeviceJonedChannelSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class DeviceLeftChannelSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "DeviceJonedLeft message" should {
     
@@ -261,7 +261,7 @@ class DeviceLeftChannelSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class SendEventSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "SendEvent message" should {
     
@@ -285,7 +285,7 @@ class SendEventSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class EventSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "Event message" should {
     
@@ -309,7 +309,7 @@ class EventSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class SendMessageSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "SendMessage message" should {
     
@@ -333,7 +333,7 @@ class SendMessageSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class MessageSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "Message message" should {
     
@@ -357,7 +357,7 @@ class MessageSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class GetDevicesSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "GetDevices message" should {
     
@@ -380,7 +380,7 @@ class GetDevicesSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class DevicesEventSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "DevicesEvent message" should {
     
@@ -406,7 +406,7 @@ class DevicesEventSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class AckSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "Ack message" should {
     
@@ -429,7 +429,7 @@ class AckSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class GetLastEventSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "GetLastEvents message" should {
     
@@ -454,7 +454,7 @@ class GetLastEventSpec extends Specification {
 @RunWith(classOf[JUnitRunner])
 class LastEventSpec extends Specification {
 
-  import MewaMessageJsonSpec._
+  import ProtocolJsonSpec._
 
   "LastEvents message" should {
     
