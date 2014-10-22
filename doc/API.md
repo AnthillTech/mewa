@@ -277,7 +277,10 @@ Packet recived by the device, containing the list of names of all other devices 
 
 
 ### Get last events
-Packet used to get infromation last events send to the channel
+This packet is used to retrieve most recent events of the given type sent into the channel by the given device.  
+In other words, this is a database where there is a maximum of one entry for each key being the pair of (device_name, event_id).
+The purpose of this service is to provide devices and applications that may have intermittent access to the channel with means of finding out about current state of other devices and services.
+
 **from:** the device  
 **to:** the channel  
 
@@ -286,8 +289,8 @@ Packet used to get infromation last events send to the channel
    "device": <device_name>,
    "prefix": <event_prefix> }
 ```
-`device ::= string` - Ask for events send by this device. If empty return events from all devices.
-`prefix ::= string` - prefix for device id
+`device ::= string` - name of the device whose events are being requested. Empty string means 'all devices'  
+`prefix ::= string` - prefix for of event id. Works in the same way as prefix filtering described in the Send Event section  
 
 
 ### Last event
@@ -297,24 +300,17 @@ Sent by the channel in response to the **get-last-events** packet
 **to:** the device  
 
 ```json
-{ "type": "last-events", 
+{ 
+  "type": "last-events", 
   "time": <timestamp>,
-  "events": <events>
+  "events": [ <event_struct>, <event_struct>, ... , <event_struct> ]
 }
-
-{"device": "deviceA", "id": "abc", "params": "12", "time": ""}
-```
-`timestamp` - ISO 8601 time when packed was processed in the channel
-`events ::= list of <event_data>` - last events 
-
-**Event data**
-```json
-{ "device": <device_name>, 
-  "id": <event_id>, 
-  "params": <event_params>, 
-  "time": <timestamp>}
 ```
 
+`timestamp ::= string` - ISO 8601 formatted time stamp indicating when this packet was processed in the channel  
+`event_struct` - JSON structure identical to the format of the Event packet. See description earlier in this document.
 
 
-*document rev 0.8*
+
+
+*document rev 0.81*
