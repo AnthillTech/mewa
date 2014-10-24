@@ -37,7 +37,7 @@ class ConnectionActor(socket: ActorRef) extends Actor{
       socket ! NotConnectedError
     
     case ConnectToChannel(channel, device, password, listenTo) =>
-      Logger.debug("Connecting device " + device + " to channel " + channel)
+      Logger.debug("Websocket: Connecting device " + device + " to channel " + channel)
       val manager = context.actorSelection("/user/channel-manager")
       manager ! ChannelManagerActor.GetChannel(channel, device, password)
       socketName = device
@@ -48,12 +48,14 @@ class ConnectionActor(socket: ActorRef) extends Actor{
   def connecting(listenTo: List[String]): Actor.Receive = {
     
     case ChannelManagerActor.ChannelFound(channel) =>
+      Logger.debug("Connecting device " + socketName)
       channel ! ChannelActor.RegisterDevice(socketName, listenTo)
       socket ! ConnectedEvent
       connectedChannel = Some(channel)
       context.become(connected(channel))
     
     case ChannelManagerActor.AuthorizationError =>
+      Logger.debug("WebSocket: Authorization error " + socketName)      
       socket ! AuthorizationError
       context.become(disconnected)
   }
@@ -93,17 +95,21 @@ class ConnectionActor(socket: ActorRef) extends Actor{
       socket ! DeviceLeftChannel(ts, deviceName)
     
     case DisconnectFromChannel =>
-      Logger.debug("Disonnecting device " + socketName)
+      Logger.debug("Websocket: Disonnecting device " + socketName)
       channel ! ChannelActor.UnRegisterDevice(socketName)
       connectedChannel = None
       socket ! DisconnectedEvent
       context.become(disconnected)
+    
+    case ConnectToChannel(channel, device, password, listenTo) =>
+      Logger.debug("Websocket: Already connected " + device)
+      socket ! AlreadyConnectedError
   }
   
   def receive = disconnected
   
   override def postStop = {
-    Logger.debug("Socket closed for device " + socketName)
+    Logger.debug("WebSocket closed for device " + socketName)
     connectedChannel foreach {_ ! ChannelActor.UnRegisterDevice(socketName)}
   }
 }

@@ -184,5 +184,20 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
         case _ => false
       }
     }
- }
+  }
+
+  "Connecting 2 devices with the same name" should {
+ 
+    "second device should be able to connect" in {
+      val probe1 = TestProbe()
+      val probe2 = TestProbe()
+      val socket1 = system.actorOf(ConnectionActor.props(probe1.ref))
+      val socket2 = system.actorOf(ConnectionActor.props(probe2.ref))
+      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
+      probe1.expectMsg(ConnectedEvent)
+      probe2.send(socket2, ConnectToChannel("test3", "probe1", "pass1", List("")))
+      probe2.expectMsg(ConnectedEvent)
+    }
+  }
+  
 }

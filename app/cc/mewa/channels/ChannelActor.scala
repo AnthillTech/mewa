@@ -14,6 +14,7 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 import java.util.Date
+import play.Logger
 
 
 /** Channel protocol */
@@ -47,11 +48,13 @@ class ChannelActor extends Actor with ActorLogging {
   def broadcaster(devices: Map[String, Subscriber], lastEvents: Map[String, Event]): Actor.Receive = {
     
     case RegisterDevice(name, eventIds) =>
+      Logger.debug("Channel: " + self.path + " register device: " + name)
       val event = JoinedChannelEvent(name, timeStamp)
       devices.values foreach (_.device ! event)
       context.become(broadcaster(devices + (name -> Subscriber(sender, eventIds)), lastEvents))
     
-    case UnRegisterDevice(name) => 
+    case UnRegisterDevice(name) =>
+      Logger.debug("Channel: " + self.path + " unregister device: " + name)
       val event = LeftChannelEvent(name, timeStamp)
       devices.filterKeys(_ != name).values foreach (_.device ! event)
       context.become(broadcaster(devices - name, lastEvents))
