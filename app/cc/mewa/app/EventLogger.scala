@@ -23,10 +23,8 @@ class EventLogger(logPath: String) extends Actor{
   }
   
   def getDay(ts: String): String = {
-    val a = ts.lastIndexOf('-')
     val b = ts.indexOf('T')
-    if(a < b) ts.substring(a, b) 
-    else ""
+    ts.substring(0, b) 
   }
   
   def toJson(timestamp: String, channel: String, device: String, id: String, params: String) = {
