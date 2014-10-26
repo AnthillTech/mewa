@@ -15,6 +15,7 @@ import java.util.TimeZone
 import java.text.SimpleDateFormat
 import java.util.Date
 import play.Logger
+import cc.mewa.api.ChannelApp.EventReceived
 
 
 /** Channel protocol */
@@ -66,6 +67,8 @@ class ChannelActor extends Actor with ActorLogging {
       val event = Event(fromDevice, eventId, content, timeStamp)
       devices.filter(isEventListener(fromDevice, eventId)).values.foreach(_.device forward event)
       val newLastEvents = saveEvent(lastEvents, event)
+      val e = EventReceived(event.timestamp, self.path.name, fromDevice, eventId, content)
+      context.system.eventStream.publish(e)
       context.become(broadcaster(devices, newLastEvents))
     
     case GetConnectedDevices =>
