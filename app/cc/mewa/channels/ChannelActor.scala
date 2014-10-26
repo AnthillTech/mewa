@@ -1,3 +1,37 @@
+/** 
+ *  Specification
+ * 
+ *  type Timestamp = String 		-- UTC tima as string
+ *  type Channel = String				-- Channel name	
+ *  type Device = String				-- Device name
+ *  type EventId = String
+ *  type Event = Data						-- Event data
+ *  type Message = Data  				-- Message data
+ *  type Socket = Actor					-- Device socket actor
+ *  type LastEventKey = String	-- Key for event cache. <device>-<eventId> 
+ *  
+ *  data ConnectedDevices = Map Device Socket 	-- Devices connected to the channel
+ *  data LastEvents = Map String Event					-- Cache for last events
+ *
+ * 	function registerDevice : ConnectedDevices x Device x [EventId] -> (ConnectedDevices, JoinedChannelEvent)
+ *  	-- Connected device to the channel. If device with given name already exists then it will be overriden.
+ * 	function unregisterDevice : ConnectedDevices x Device -> (ConnectedDevices, LeftChannelEvent)
+ *  	-- Discconnected device from the channel. 
+ * 	function getConnectedDevices : ConnectedDevices -> [Device]
+ *  	-- List of connected devices
+ * 	function sendMessage : ConnectedDevices x Message -> Message
+ *  	-- Redirect message to target device
+ * 	function sendEvent : ConnectedDevices x Event x LastEvent-> ([Event], LastEvent)
+ *  	-- Redirect event to all devices except sender
+ * 	function lastEvent : LastEvents x Device x EventId -> [Event]
+ *  	-- Return last events by event id send be given device.
+ *  
+ * Invariants:
+ *   * Counting RegisterDevice and UnregisterDevice events should always get correct number of connected devices
+ *   * Any device when asking for connected devices should get itself on the list.
+ *   
+ * @author Krzysztof Langner    
+ */
 package cc.mewa.channels
 
 import akka.actor.{Actor, ActorRef, Props}
