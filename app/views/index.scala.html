@@ -69,7 +69,8 @@
     });
 
     function createConnection(channelName, device, pass){
-        var url = "@routes.WebSocketController.ws.webSocketURL()";
+        var route = "@routes.WebSocketController.ws.webSocketURL()";
+        var url = 'https:' == document.location.protocol ? route.replace("ws://", "wss://") : route;
         var connection = channelConnect(url, channelName, device, pass, [""]);
       
         connection.onConnected = function(){
