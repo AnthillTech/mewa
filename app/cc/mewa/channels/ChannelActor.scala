@@ -23,8 +23,6 @@
  *  	-- Redirect message to target device
  * 	function sendEvent : ConnectedDevices x Event x LastEvent-> ([Event], LastEvent)
  *  	-- Redirect event to all devices except sender
- * 	function lastEvent : LastEvents x Device x EventId -> [Event]
- *  	-- Return last events by event id send be given device.
  *  
  * Invariants:
  *   * Counting RegisterDevice and UnregisterDevice events should always get correct number of connected devices
@@ -65,9 +63,6 @@ object ChannelActor {
   case class SendToDevice(fromDevice: String, toDevice: String, message: Any, timestamp: String)
   case class Event(fromDevice: String, eventId: String, content: String, timestamp: String)
   
-  case class GetLastEvents(device: String, prefix: String)
-  case class LastEvents(events: List[Event], timeStamp: String)
-  
 }
 
 /** Subscription information */
@@ -80,19 +75,19 @@ class ChannelActor extends Actor with ActorLogging {
 
   import ChannelActor._
   
-  def broadcaster(devices: Map[String, Subscriber], lastEvents: Map[String, Event]): Actor.Receive = {
+  def broadcaster(devices: Map[String, Subscriber]): Actor.Receive = {
     
     case RegisterDevice(name, eventIds) =>
       Logger.debug("Channel: " + self.path + " register device: " + name)
       val event = JoinedChannelEvent(name, timeStamp)
       devices.values foreach (_.device ! event)
-      context.become(broadcaster(devices + (name -> Subscriber(sender, eventIds)), lastEvents))
+      context.become(broadcaster(devices + (name -> Subscriber(sender, eventIds))))
     
     case UnRegisterDevice(name) =>
       Logger.debug("Channel: " + self.path + " unregister device: " + name)
       val event = LeftChannelEvent(name, timeStamp)
       devices.filterKeys(_ != name).values foreach (_.device ! event)
-      context.become(broadcaster(devices - name, lastEvents))
+      context.become(broadcaster(devices - name))
     
     case msg @ SendToDevice(fromDevice, toDevice, message, ts) =>
       devices.get(toDevice) foreach (_.device ! SendToDevice(msg.fromDevice, msg.toDevice, msg.message, timeStamp))
@@ -100,20 +95,15 @@ class ChannelActor extends Actor with ActorLogging {
     case Event(fromDevice, eventId, content, ts) =>
       val event = Event(fromDevice, eventId, content, timeStamp)
       devices.filter(isEventListener(fromDevice, eventId)).values.foreach(_.device forward event)
-      val newLastEvents = saveEvent(lastEvents, event)
       val e = EventReceived(event.timestamp, self.path.name, fromDevice, eventId, content)
       context.system.eventStream.publish(e)
-      context.become(broadcaster(devices, newLastEvents))
+      context.become(broadcaster(devices))
     
     case GetConnectedDevices =>
       sender ! ConnectedDevices(devices.keys.toList, timeStamp)
-    
-    case GetLastEvents(device, prefix) =>
-      val events = selectLastEvents(lastEvents, device, prefix)
-      sender ! LastEvents(events, timeStamp)
   }
   
-  def receive = broadcaster(Map.empty, Map.empty)
+  def receive = broadcaster(Map.empty)
   
   def timeStamp: String = {
     dataFormat.format(new Date())
@@ -135,12 +125,4 @@ class ChannelActor extends Actor with ActorLogging {
     }
   }
 
-  def saveEvent(lastEvents: Map[String,Event], event: Event) = {
-    val key: String = event.fromDevice + "-" + event.eventId
-    lastEvents + ((key, event))
-  }
-
-  def selectLastEvents(lastEvents: Map[String,Event], device: String, prefix: String): List[Event] = {
-    lastEvents.values.filter { e => e.fromDevice.startsWith(device) && e.eventId.startsWith(prefix) }.toList
-  }
 }

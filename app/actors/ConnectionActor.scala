@@ -82,12 +82,6 @@ class ConnectionActor(socket: ActorRef) extends Actor{
     case ChannelActor.ConnectedDevices(devices, ts) =>
       socket ! DevicesEvent(ts, devices)
       
-    case GetLastEvents(device, prefix) =>
-      channel ! ChannelActor.GetLastEvents(device, prefix)
-      
-    case ChannelActor.LastEvents(events, ts) =>
-      socket ! LastEvents(ts, events.map {e => Event(e.timestamp, e.fromDevice, e.eventId, e.content)})
-      
     case ChannelActor.JoinedChannelEvent(deviceName, ts) =>
       socket ! DeviceJoinedChannel(ts, deviceName)
       

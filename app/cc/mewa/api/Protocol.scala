@@ -53,10 +53,5 @@ object Protocol {
   case class Message(timeStamp: String, fromDevice: String, messageId: String, params: String) extends MewaMessage  
   /** Acknowledge that server received event or message */
   case object Ack extends MewaMessage  
-  
-  /** Ask for last events */
-  case class GetLastEvents(dvice: String, eventPrefix: String) extends MewaMessage
-  /** Event with list of all connected devices */
-  case class LastEvents(timeStamp: String, events: List[Event]) extends MewaMessage
 
 }

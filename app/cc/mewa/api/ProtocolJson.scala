@@ -49,14 +49,6 @@ object ProtocolJson {
       case msg: SendMessage => Json.obj( "type" -> "send-message", "device" -> msg.targetDevice, "id" -> msg.messageId, "params" ->msg.params )
       case msg: Message => Json.obj( "type" -> "message", "time" -> msg.timeStamp, "device" -> msg.fromDevice, "id" -> msg.messageId, "params" ->msg.params )
       case Ack => Json.obj("type" -> "ack")
-
-      case GetLastEvents(device, prefix) => Json.obj("type" -> "get-last-events", "device" -> device, "prefix" -> prefix)
-      case msg: LastEvents => Json.obj( "type" -> "last-events"
-                                      , "time" -> msg.timeStamp
-                                      , "events" -> msg.events.map {e => Json.obj( "device" -> e.fromDevice
-                                                                                 , "id" -> e.eventId
-                                                                                 , "params" -> e.params
-                                                                                 , "time" -> e.timeStamp)} )                                                                                                                        
 }
 
   /**
@@ -82,8 +74,6 @@ object ProtocolJson {
       
       case "get-devices" => JsSuccess(GetDevices)
       case "devices-event" => devicesEventFromJson(jsval)
-      case "get-last-events" => getLastEventsFromJson(jsval)
-      case "last-events" => lastEventsFromJson(jsval)
       case other => JsError("Unknown client message: <" + other + ">")
     }
   }
@@ -137,19 +127,6 @@ object ProtocolJson {
   def devicesEventFromJson(jsval:JsValue): JsResult[DevicesEvent] = { 
     val deviceNames = (jsval \ "devices").as[List[String]]
     JsSuccess(DevicesEvent("", deviceNames))
-  }
-
-  def getLastEventsFromJson(jsval:JsValue): JsResult[GetLastEvents] = { 
-    val device = (jsval \ "device").as[String]
-    val prefix = (jsval \ "prefix").as[String]
-    JsSuccess(GetLastEvents(device, prefix))
-  }
-
-  def lastEventsFromJson(jsval:JsValue): JsResult[LastEvents] = {
-    val events: List[Event] = (jsval \ "events").as[List[JsValue]].map {v => 
-      eventFromJson(v).getOrElse(Event("", "", "", ""))
-    }
-    JsSuccess(LastEvents("", events))
   }
 }
 

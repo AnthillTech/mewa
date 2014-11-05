@@ -147,45 +147,8 @@ class ConnectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Im
           false
       }
     }
-  
-    "get last event" in {
-      val probe1 = TestProbe()
-      val probe2 = TestProbe()
-      val socket1 = system.actorOf(ConnectionActor.props(probe1.ref))
-      val socket2 = system.actorOf(ConnectionActor.props(probe2.ref))
-      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
-      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1", List("")))
-      probe2.expectMsg(ConnectedEvent)
-      probe1.send(socket1, SendEvent("event1", "12", false))
-      probe2.fishForMessage() {
-        case Event(_, "probe1", "event1", "12") => true
-        case m => false
-      }
-      probe2.send(socket2, GetLastEvents("", ""))
-      probe2.fishForMessage() {
-        case LastEvents(_, List(Event(_, "probe1", "event1", "12"))) => true
-        case _ => false
-      }
-    }
-  
-    "get last event 2" in {
-      val probe1 = TestProbe()
-      val probe2 = TestProbe()
-      val socket1 = system.actorOf(ConnectionActor.props(probe1.ref))
-      val socket2 = system.actorOf(ConnectionActor.props(probe2.ref))
-      probe1.send(socket1, ConnectToChannel("test3", "probe1", "pass1", List()))
-      probe2.send(socket2, ConnectToChannel("test3", "probe2", "pass1", List("")))
-      probe2.expectMsg(ConnectedEvent)
-      probe1.send(socket1, SendEvent("event1", "12", false))
-      probe1.send(socket1, SendEvent("event1", "13", false))
-      probe2.send(socket2, GetLastEvents("", ""))
-      probe2.fishForMessage() {
-        case LastEvents(_, List(Event(_, "probe1", "event1", "13"))) => true
-        case _ => false
-      }
-    }
   }
-
+  
   "Connecting 2 devices with the same name" should {
  
     "second device should be able to connect" in {

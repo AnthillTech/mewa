@@ -15,7 +15,8 @@ libraryDependencies ++= Seq(
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.1",
   "org.scalatest" % "scalatest_2.11" % "2.2.0" % "test",
   "com.typesafe.akka" %% "akka-testkit" % "2.3.3" % "test", 
-  "org.scalacheck" %% "scalacheck" % "1.11.4" % "test"
+  "org.scalacheck" %% "scalacheck" % "1.11.4" % "test",
+  "cc.mewa" %% "mewa-api" % "0.3"
 )
 
 scalacOptions ++= Seq("-feature")
