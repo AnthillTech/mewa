@@ -34,7 +34,7 @@ function channelConnect(url, channelName, deviceName, password, listenTo){
 	        _connection._sendMsg(msg);
 		},
 		/** Received event */
-		onEvent: function(device, eventId, params) {},
+		onEvent: function(device, eventId, params, ts) {},
 		/** Received ack */
 		onAck: function() {},
 		/** send event to all devices */
@@ -43,7 +43,7 @@ function channelConnect(url, channelName, deviceName, password, listenTo){
 	        _connection._sendMsg(msg);
 		},
 		/** Received message */
-		onMessage: function(device, messageId, params) {},
+		onMessage: function(device, messageId, params, ts) {},
 		/** Get list of all connected to the channel devices */
 		getDevices: function() {
 			msg = {type: "get-devices"}
